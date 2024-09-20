@@ -1,0 +1,47 @@
+|CALIBRATION TEST|[Setting: 10ms]->@time-measure: 117948807. 
+Timer_missed : 1
+Timer_missed : 2
+
+|TID:3717775296|-->[Chain1-Sensor1.exe:510(100us)]-->[Start@1726404218204813831-End@1726404219264443618-Cost:1059629787(ns) and Published msg: 0]. 
+Timer_missed : 3
+
+|TID:3717775296|-->[Chain3-Sensor1.exe:510(100us)]-->[Start@1726404219264605882-End@1726404219297045363-Cost:32439481(ns) and Published msg: 0]. 
+Timer_missed : 4
+
+|TID:3717775296|-->[Chain1-Sensor1.exe:510(100us)]-->[Start@1726404219315814391-End@1726404220137974926-Cost:822160535(ns) and Published msg: 1]. 
+
+|TID:3646600960|-->[Chain2-Sensor1.exe:510(100us)]-->[Start@1726404219260072047-End@1726404221459876795-Cost:2199804748(ns) and Published msg: 0]. 
+
+|TID:3717775296|-->[Chain1-Transfer2.exe:340(100us)]-->[Start@1726404220138645902-End@1726404222752946119-Cost:2614300217(ns) and Route msg: 0]. 
+Timer_missed : 5
+
+|TID:3646600960|-->[Chain3-Transfer2.exe:340(100us)]-->[Start@1726404221460666916-End@1726404224405446747-Cost:2944779831(ns) and Route msg: 0]. 
+Timer_missed : 6
+
+|TID:3717775296|-->[Chain1-Sensor1.exe:510(100us)]-->[Start@1726404224183331392-End@1726404225762024878-Cost:1578693486(ns) and Published msg: 2]. 
+Timer_missed : 7
+
+|TID:3646600960|-->[Chain2-Sensor1.exe:510(100us)]-->[Start@1726404224405641598-End@1726404226518877833-Cost:2113236235(ns) and Published msg: 1]. 
+
+|TID:3717775296|-->[Chain3-Sensor1.exe:510(100us)]-->[Start@1726404225766374447-End@1726404227134845396-Cost:1368470949(ns) and Published msg: 1]. 
+
+|TID:3646600960|-->[Chain1-Transfer2.exe:340(100us)]-->[Start@1726404226522440668-End@1726404227782865932-Cost:1260425264(ns) and Route msg: 1]. 
+
+|TID:3717775296|-->[Chain1-Command3.exe:170(100us)]-->[Start@1726404227206845524-End@1726404228239550542-Cost:1032705018(ns) and Received msg: 0]. 
+
+|TID:3646600960|-->[Chain2-Transfer2.exe:340(100us)]-->[Start@1726404227786764111-End@1726404228254993881-Cost:468229770(ns) and Route msg: 0]. 
+Timer_missed : 8
+Timer_missed : 9
+
+|TID:3646600960|-->[Chain1-Sensor1.exe:510(100us)]-->[Start@1726404228294010245-End@1726404230613247316-Cost:2319237071(ns) and Published msg: 3]. 
+Timer_missed : 10
+
+|TID:3717775296|-->[Chain2-Sensor1.exe:510(100us)]-->[Start@1726404228302225305-End@1726404230743949381-Cost:2441724076(ns) and Published msg: 2]. 
+
+|TID:3717775296|-->[Chain1-Transfer2.exe:340(100us)]-->[Start@1726404230862965812-End@1726404232020883081-Cost:1157917269(ns) and Route msg: 2]. 
+
+|TID:3646600960|-->[Chain3-Sensor1.exe:510(100us)]-->[Start@1726404230613430388-End@1726404232442716797-Cost:1829286409(ns) and Published msg: 2]. 
+
+|TID:3646600960|-->[Chain2-Command3.exe:170(100us)]-->[Start@1726404232442966891-End@1726404233824202915-Cost:1381236024(ns) and Received msg: 0]. 
+
+|TID:3717775296|-->[Chain2-Transfer2.exe:340(100us)]-->[Start@1726404232437475686-End@1726404234227074318-Cost:1789598632(ns) and Route msg: 1]. 
