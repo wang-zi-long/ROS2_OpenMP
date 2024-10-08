@@ -18,4 +18,4 @@
 
 // 开启Timer错过的打印输出
 #define TIMER_MISSED    1
-#define CHAIN_WORKFLOW  0.2
+#define CHAIN_WORKFLOW  0.3

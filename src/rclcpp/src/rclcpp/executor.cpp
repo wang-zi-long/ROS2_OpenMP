@@ -35,6 +35,15 @@
 
 #include "tracetools/tracetools.h"
 
+#include "/usr/local/lib/gcc/x86_64-pc-linux-gnu/15.0.0/include/omp.h"
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <string>
+#include <cstdlib>
+#include <time.h>
+#include <stdint.h>
+#include <stdlib.h>
+
 using namespace std::chrono_literals;
 
 using rclcpp::exceptions::throw_from_rcl_error;
@@ -899,6 +908,20 @@ Executor::get_next_ready_executable_from_map(
   return success;
 }
 
+uint64_t get_clocktime1() { 
+    long int        ns; 
+    uint64_t        all; 
+    time_t          sec; 
+    struct timespec spec; 
+
+    clock_gettime(CLOCK_REALTIME, &spec);
+
+    sec   = spec.tv_sec; 
+    ns    = spec.tv_nsec; 
+    all   = (uint64_t) sec * 1000000000UL + (uint64_t) ns; 
+    return all;  
+}
+
 bool
 Executor::get_next_executable(AnyExecutable & any_executable, std::chrono::nanoseconds timeout)
 {
@@ -908,6 +931,35 @@ Executor::get_next_executable(AnyExecutable & any_executable, std::chrono::nanos
   success = get_next_ready_executable(any_executable);
   // If there are none
   if (!success) {
+
+    if(get_strategy() == 2){
+      // 当wait_set中没有多余的就绪回调时，在更新wait_set之前，应当首先查看omp队列
+      // omp任务等待omp从线程执行的最长时间，应该就是查看一次wait_set的时间
+      // long int tid = syscall(SYS_gettid);
+      // uint64_t cur_time = get_clocktime1();
+      // printf("|TID:%ld|-->|Before      wait_for_work:%lu|\n", tid, cur_time);
+      omp_Node *temp = dequeue();
+      if(temp != NULL){
+        // cur_time = get_clocktime1();
+        // printf("|TID:%ld|-->|omp_queue is not    empty:%lu|\n", tid, cur_time);
+        temp->fn(temp->data);
+        dequeue1(temp);
+      }else if(helpflag() == true){
+        // omp主线程暂时还未入队完毕，但是需要omp从线程的帮助，所以执行器线程再查看一次omp队列
+        while (helpflag() == true)
+        {
+          temp = dequeue();
+          if(temp != NULL){
+            // cur_time = get_clocktime1();
+            // printf("|TID:%ld|-->|omp_queue is not    empty!!!!!:%lu|\n", tid, cur_time);
+            temp->fn(temp->data);
+            dequeue1(temp);
+            break;
+          }
+        }
+      }
+    }
+
     // Wait for subscriptions or timers to work on
     wait_for_work(timeout);
     if (!spinning.load()) {

@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.5)
 
 project(rcl)
 
+set(OpenMP_gomp_LIBRARY "/usr/local/lib64/libgomp.so")
+
 find_package(ament_cmake_ros REQUIRED)
 
 find_package(rcl_interfaces REQUIRED)
@@ -12,6 +14,8 @@ find_package(rmw REQUIRED)
 find_package(rmw_implementation REQUIRED)
 find_package(rosidl_runtime_c REQUIRED)
 find_package(tracetools REQUIRED)
+
+find_package(OpenMP REQUIRED)
 
 include(cmake/rcl_set_symbol_visibility_hidden.cmake)
 include(cmake/get_default_rcl_logging_implementation.cmake)
@@ -82,6 +86,9 @@ ament_target_dependencies(${PROJECT_NAME}
   "rosidl_runtime_c"
   "tracetools"
 )
+
+# 链接 OpenMP 和其他库
+target_link_libraries(${PROJECT_NAME} OpenMP::OpenMP_CXX ${CMAKE_THREAD_LIBS_INIT})
 
 # Causes the visibility macros to use dllexport rather than dllimport,
 # which is appropriate when building the dll but not consuming it.
