@@ -251,7 +251,11 @@ extern "C" {
 typedef struct omp_Node {
   void (*fn) (void *);
   void *data;
-  int priority;
+  // 用来统计该任务节点执行的次数，初始值与omp线程数目相等
+  // 只有count=0时，该任务节点才可以从队列中移除
+  int count;
+  // 用来标记任务节点是否已经被回收
+  bool reclaim_flag;
   // 用来互斥访问和修改任务节点（由于omp主从线程访问和修改reclaim_flag和count时可能存在非常微小的时间差，因此需要加锁）
   pthread_mutex_t lock;
   // 用来同步omp主线程和从线程
@@ -261,17 +265,24 @@ typedef struct omp_Node {
   struct omp_Node* next;
 } omp_Node;
 
+typedef struct Queue {
+  omp_Node *head;
+  //互斥锁，互斥入队操作和出队操作
+  pthread_mutex_t lock; 
+  //同步锁，当队列为空时，出队操作会堵塞线程，直到入队操作填充队列后才唤醒被堵塞队列
+  pthread_cond_t cond;
+}Queue;
+
+extern Queue* omp_queue;
+
 extern void omp_queue_init (void) __GOMP_NOTHROW;
-extern void enqueue (void (*) (void *), void*, int, int) __GOMP_NOTHROW;
+extern omp_Node* enqueue (void (*) (void *), void*) __GOMP_NOTHROW;
 extern omp_Node* dequeue (void) __GOMP_NOTHROW;
 extern void dequeue1(omp_Node*) __GOMP_NOTHROW;
-extern omp_Node* dequeue2(int) __GOMP_NOTHROW;
 extern bool helpflag(void) __GOMP_NOTHROW;
 extern void set_strategy(int) __GOMP_NOTHROW;
 extern int get_strategy(void) __GOMP_NOTHROW;
 extern void set_executor_num(int) __GOMP_NOTHROW;
-extern void set_priority(int, uint64_t) __GOMP_NOTHROW;
-extern void set_tid_map(long int, int) __GOMP_NOTHROW;
 
 extern void omp_set_num_threads (int) __GOMP_NOTHROW;
 extern int omp_get_num_threads (void) __GOMP_NOTHROW;

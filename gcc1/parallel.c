@@ -203,113 +203,122 @@ bool help_flag;
 bool helpflag(){
   return help_flag;
 }
-ialias(helpflag)
 
 int strategy = -1;
 void set_strategy(int temp){
   strategy = temp;
 }
-ialias(set_strategy)
 int get_strategy(){
   return strategy;
 }
-ialias(get_strategy)
 
 int executor_num = -1;
 void set_executor_num(int temp){
   executor_num = temp;
 }
-ialias(set_executor_num)
-
-#define max_executor_num  10
-int priority[max_executor_num];
-void set_priority(int executor_id, uint64_t pri){
-  priority[executor_id] = pri;
-}
-ialias(set_priority)
-
-typedef struct Entry {
-    long int key;
-    int value;
-    struct Entry* next;  // 用于处理哈希冲突的链表
-} Entry;
-Entry* Table;
-void insert(long int key, int value) {
-    Entry* newEntry = (Entry*)malloc(sizeof(Entry));
-    newEntry->key = key;
-    newEntry->value = value;
-    newEntry->next = Table->next;
-    Table->next = newEntry;
-}
-int find(long int key) {
-    Entry* entry = Table->next;
-    while (entry != NULL) {
-        if (entry->key == key) {
-            return entry->value;
-        }
-        entry = entry->next;
-    }
-    return -1;
-}
-void set_tid_map(long int tid, int executor_id){
-  insert(tid, executor_id);
-}
-ialias(set_tid_map)
 
 void
 GOMP_parallel (void (*fn) (void *), void *data, unsigned num_threads,
 	       unsigned int flags)
 {
-  if(strategy == -1){
-    printf("Not set OMP_strategy!!!\n");
-  }else if(strategy == 1){
-    num_threads = gomp_resolve_num_threads (num_threads, 0);
-    gomp_team_start (fn, data, num_threads, flags, gomp_new_team (num_threads),
-        NULL);
-    fn (data);
-    ialias_call (GOMP_parallel_end) ();
-  }else if(strategy == 2){
-    if(executor_num == -1){
-      printf("Not set executor_num!!!\n");
-    }
-    long int Tid = syscall(SYS_gettid);
-    int executor_id = find(Tid);
-    if(executor_id == -1){
-      printf("Find executor_id failed!!!\n");
-    }
-    int pri = priority[executor_id];
-
-    help_flag = true;
-    enqueue(fn, data, pri, executor_num);
-    help_flag = false;
-
-    omp_Node * temp = dequeue2(pri);
-    while (temp != NULL)
-    {
-      temp->fn(temp->data);
-      dequeue1(temp);
-      temp = dequeue2(pri);
-    }
+if(strategy == -1){
+  printf("Not set OMP_strategy!!!\n");
+}else if(strategy == 1){
+  num_threads = gomp_resolve_num_threads (num_threads, 0);
+  gomp_team_start (fn, data, num_threads, flags, gomp_new_team (num_threads),
+		   NULL);
+  fn (data);
+  ialias_call (GOMP_parallel_end) ();
+}else if(strategy == 2){
+  if(executor_num == -1){
+    printf("Not set executor_num!!!\n");
   }
+  // long int Tid = syscall(SYS_gettid);
+  // // int cpu_core = getcpu_via_syscall();
+  // uint64_t cur_time = get_clocktime();
+  // printf("|TID:%ld|-->[GOMP_parallel:%lu]\n", Tid, cur_time);
+
+  // @Mark：修改代码逻辑：在入队之前，首先将help_flag置成true
+  // omp从线程在wait_for_work之前，即使未出队成功，但是如果看到help_flag为true，omp从线程会循环查询omp队列
+  help_flag = true;
+  // 主线程将任务加入队列中，唤醒因队空而堵塞的从线程
+  omp_Node *temp = enqueue(fn, data);
+  help_flag = false;
+
+  // cur_time = get_clocktime();
+  // printf("|TID:%ld|-->[After enqueue:%lu]\n", Tid, cur_time);
+
+  // 主线程执行任务，@Mark：此处存在问题，整体任务并没有按照线程数平分成若干个任务，后续需要修改
+  fn(data);
+
+  // omp_Node *temp = omp_queue->head->next;
+  // if(temp != NULL){
+  //   cur_time = get_clocktime();
+  //   printf("|TID:%ld|-->[Before cowait:%lu]-->[temp_ptr:%p]\n", Tid, cur_time, (void*)temp);
+  //   pthread_cond_wait(&temp->cond, &temp->lock);
+  // }
+  pthread_mutex_lock(&temp->lock);
+  // 添加逻辑，omp主线程查看任务节点是否从omp队列中（被omp从线程）取出
+  // @Mark：当执行器线程的个数大于2时，后续的代码逻辑需要进行修改
+  if(temp->count == 1){
+    // 如果任务节点未被取出，说明另一个执行器未进入omp从线程的状态，因此该任务节点仍由omp主线程执行
+    // cur_time = get_clocktime();
+    // printf("|TID:%ld|-->[Before    deq:%lu]\n", Tid, cur_time);
+    // @Mark：当任务节点加上优先级后，此处的代码逻辑后续需要修改
+    // @Note：omp主线程执行到此处时，另一个执行器线程可能也处于omp主线程状态，因此，此时不能直接执行dequeue()函数出队
+    temp->count--;
+    if(temp->count == 0){
+      // 此处需要加锁，因为此时修改的是omp队列，即将任务节点从omp队列中取出
+      pthread_mutex_lock(&omp_queue->lock);
+      temp->pre->next = temp->next;
+      if(temp->next != NULL){
+        temp->next->pre = temp->pre;
+      }
+      pthread_mutex_unlock(&omp_queue->lock);
+      temp->pre = temp->next = NULL;
+    }else{
+      // @mark：当执行器线程个数大于2，此处的代码逻辑需要进一步思考
+    }
+    pthread_mutex_unlock(&temp->lock);
+    temp->fn(temp->data);
+    dequeue1(temp);
+  }else if(temp->count != 1 && !temp->reclaim_flag){
+    // @Note：omp主线程有可能比omp从线程更晚执行结束
+    // 经过测试，有可能发生这种情况，主线程和从线程的执行结束时间仅差一点，即主线程略晚于从线程执行结束，此时主线程不需要任何操作（从线程将任务节点回收）
+    // cur_time = get_clocktime();
+    // printf("|TID:%ld|-->[Before cowait:%lu]-->[temp_ptr:%p]\n", Tid, cur_time, (void*)temp);
+    // 用来标记omp主线程进入堵塞状态，任务节点的回收实际上还是omp线程来干
+    // 经过测试，发现这么一个现象：在主线程检查reclaim_flag之后、堵塞之前，从线程将reclaim_flag置成true，因此在此多一层判断
+    temp->reclaim_flag = true;
+    pthread_mutex_unlock(&temp->lock);
+    // 如果任务节点已经被omp从线程取出，omp主线程等待omp从线程执行完成
+    pthread_cond_wait(&temp->cond, &temp->lock);
+  }
+  // cur_time = get_clocktime();
+  // printf("|TID:%ld|-->[Ret  parallel:%lu]\n", Tid, cur_time);
+}
 }
 
-pthread_mutex_t queue_lock;
-omp_Node *queue;
+Queue* omp_queue;
 // 通过锁从node_pool里互斥申请和回收任务节点
-#define node_pool_num 20
 pthread_mutex_t pool_lock;
 omp_Node* node_pool;
+#define node_pool_num 5
 
 void omp_queue_init(){
-  queue = (omp_Node*)malloc(sizeof(omp_Node));
-  queue->pre = NULL;
-  queue->next = NULL;
-  pthread_mutex_init(&queue_lock, NULL);
+  // @Mark：后续更改成静态分配空间
+  omp_queue = (Queue *)malloc(sizeof(Queue));
+  omp_queue->head = (omp_Node*)malloc(sizeof(omp_Node));
+  omp_queue->head->pre = NULL;
+  omp_queue->head->next = NULL;
+  pthread_mutex_init(&omp_queue->lock, NULL);
+  pthread_cond_init(&omp_queue->cond, NULL); 
   node_pool = (omp_Node*)malloc(sizeof(omp_Node));
   node_pool->pre = NULL;
   node_pool->next = NULL;
   for(int i = 0;i < node_pool_num;++i){
     omp_Node* temp = (omp_Node*)malloc(sizeof(omp_Node));
+    temp->reclaim_flag = true;
     if(i == 0){
       node_pool->next = temp;
       node_pool->pre = temp;
@@ -325,110 +334,128 @@ void omp_queue_init(){
     pthread_cond_init(&temp->cond, NULL);
   }
   help_flag = false;
-  Table = (Entry*)malloc(sizeof(Entry));
-  Table->next = NULL;
 }
 ialias (omp_queue_init)
 
-void enqueue(void (*fn) (void *), void *data, int priority, int executor_num) {
-  for(int i = 0;i < executor_num;++i){
-    pthread_mutex_lock(&pool_lock);
-    omp_Node* temp;
-    if(node_pool->pre == node_pool->next && node_pool->pre == NULL){
-      // 此时node_pool为空，输出一下，暂时不做处理
-      printf("Node_pool is empty!!!\n");
-      return;
-    }else if(node_pool->pre == node_pool->next && node_pool->pre != NULL){
-      // 此时node_pool里面只剩下一个任务节点
-      temp = node_pool->pre;
-      node_pool->pre = node_pool->next = NULL;
-    }else{
-      temp = node_pool->pre;
-      node_pool->pre = temp->pre;
-      temp->pre->next = node_pool;
-    }
-    temp->pre = temp->next = NULL;
-    temp->fn = fn;
-    temp->data = data;
-    temp->priority = priority;
-    pthread_mutex_unlock(&pool_lock);
-
-    pthread_mutex_lock(&queue_lock);
-    if(queue->pre == queue->next && queue->pre == NULL){
-      queue->pre = temp;
-      queue->next = temp;
-      temp->pre = queue;
-      temp->next = queue;
-    }else{
-      omp_Node* pre = queue;
-      while(pre->next != NULL && pre->next->priority <= temp->priority){
-        pre = pre->next;
-      }
-      temp->next = queue->next;
-      temp->pre = queue;
-      temp->next->pre = temp;
-      queue->next = temp;
-    }
-    pthread_mutex_unlock(&queue_lock);
+omp_Node* enqueue(void (*fn) (void *), void *data) {
+  // 每次从node_pool的末尾申请节点，将回收的节点加入node_pool的首部，以保证上一次和本次入队时申请的节点不同
+  // @Note：此处可能存在问题，后续需要检查和修改
+  pthread_mutex_lock(&pool_lock);
+  omp_Node* temp;
+  if(node_pool->pre == node_pool->next && node_pool->pre == NULL){
+    // 此时node_pool为空，输出一下，暂时不做处理
+    printf("Node_pool is empty!!!\n");
+    return NULL;
+  }else if(node_pool->pre == node_pool->next && node_pool->pre != NULL){
+    // 此时node_pool里面只剩下一个任务节点
+    temp = node_pool->pre;
+    node_pool->pre = node_pool->next = NULL;
+  }else{
+    temp = node_pool->pre;
+    node_pool->pre = temp->pre;
+    temp->pre->next = node_pool;
   }
+  temp->pre = temp->next = NULL;
+  temp->fn = fn;
+  temp->data = data;
+  temp->reclaim_flag = false;
+  // @Mark：omp_get_num_threads()的值持续等于1，预留API接口
+  // @Note：count的初始值为1，意味着omp从线程从omp队列中取出任务节点即可执行
+  // @Mark：任务节点的初始值与执行器线程的个数相关，当执行器线程的个数大于2时，后续代码逻辑需要进一步思考
+  temp->count = executor_num - 1;
+  pthread_mutex_unlock(&pool_lock);
+
+  pthread_mutex_lock(&omp_queue->lock);
+  if(omp_queue->head->pre == omp_queue->head->next && omp_queue->head->pre == NULL){
+    omp_queue->head->pre = temp;
+    omp_queue->head->next = temp;
+    temp->pre = omp_queue->head;
+    temp->next = omp_queue->head;
+  }else{
+    omp_Node* pre = omp_queue->head;
+    while(pre->next != NULL && pre->next->count <= temp->count){
+      pre = pre->next;
+    }
+    temp->next = omp_queue->head->next;
+    temp->pre = omp_queue->head;
+    temp->next->pre = temp;
+    omp_queue->head->next = temp;
+  }
+  // pthread_cond_signal(&omp_queue->cond);
+  pthread_mutex_unlock(&omp_queue->lock);
+  return temp;
 }
 ialias (enqueue)
 
+// 此函数实际上用来检查omp队列是否为空，如果不为空，返回omp队列中的第一个任务节点
 omp_Node* dequeue() {
-  pthread_mutex_lock(&queue_lock);
-  while (queue->pre == queue->next && queue->pre == NULL) {
-    pthread_mutex_unlock(&queue_lock);
-    return NULL;
+  // long int Tid = syscall(SYS_gettid);
+  // int cpu_core = getcpu_via_syscall();
+  // uint64_t current_time;
+  while (omp_queue->head->pre == omp_queue->head->next && omp_queue->head->next == NULL) {
+      return NULL;
+      // pthread_cond_wait(&omp_queue->cond, &omp_queue->lock);
+      // current_time = get_clocktime();
+      // printf("|TID:%ld|-->[CPU Core On:%d]-->[dequeue waiting222:%lu]\n", Tid, cpu_core, current_time);
   }
-  // priority的值越小，任务节点的优先级越大
-  omp_Node *temp = queue->next;
-  if(queue->pre == queue->next && queue->pre != NULL){
-    queue->pre = queue->next = NULL;
-  }else{
+  pthread_mutex_lock(&omp_queue->lock);
+  // 后进先出策略
+  // @Note：后续任务节点添加优先级后，按照优先级出队的逻辑在此处修改添加
+  omp_Node *temp = omp_queue->head->next;
+  // omp从线程才会执行此函数，而且只要omp从线程执行此函数，意味着omp从线程即将执行任务节点的内容
+  
+  // 需要判断，只有当任务节点执行次数为0时，才能将其从omp队列中移除
+  // @Note：只是将任务节点从omp队列中移除，并没有回收任务节点
+  if(temp->count == 0){
+    // @mark：当执行器线程个数等于2时，omp从线程执行此函数，不可能执行下一分支（任务节点的初始值是1）
     temp->pre->next = temp->next;
-    temp->next->pre = temp->pre;
+    if(temp->next != NULL){
+      temp->next->pre = temp->pre;
+    }
+    temp->pre = temp->next = NULL;
+  }else{
+    // @mark：当执行器线程个数大于2，此处的代码逻辑需要进一步思考
   }
-  temp->pre = temp->next = NULL;
-  pthread_mutex_unlock(&queue_lock);
+  pthread_mutex_unlock(&omp_queue->lock);
+  temp->count--;
   return temp;
 }
 ialias (dequeue)
 
-omp_Node* dequeue2(int priority) {
-  pthread_mutex_lock(&queue_lock);
-  while (queue->pre == queue->next && queue->pre == NULL) {
-    pthread_mutex_unlock(&queue_lock);
-    return NULL;
-  }
-  omp_Node *temp = queue->next;
-  // priority的值越小，任务节点的优先级越大
-  if(temp->priority > priority){
-    pthread_mutex_unlock(&queue_lock);
-    return NULL;
-  }
-  if(queue->pre == queue->next && queue->pre != NULL){
-    queue->pre = queue->next = NULL;
-  }else{
-    temp->pre->next = temp->next;
-    temp->next->pre = temp->pre;
-  }
-  temp->pre = temp->next = NULL;
-  pthread_mutex_unlock(&queue_lock);
-  return temp;
-}
-ialias (dequeue2)
-
+// dequeue函数与dequeue1函数无法合并，因为只有当任务节点的内容执行完毕后，才能回收任务节点
 void dequeue1(omp_Node *temp){
-  pthread_mutex_lock(&pool_lock);
-  if(node_pool->pre == node_pool->next && node_pool->pre == NULL){
-    node_pool->pre = node_pool->next = temp;
-  }else{
+  // long int Tid = syscall(SYS_gettid);
+  // 访问任务节点时上锁的主要目的：使得omp主线程在GOMP_parallel()函数里访问任务节点和omp从线程执行此函数时互斥
+  pthread_mutex_lock(&temp->lock);
+  // pthread_mutex_lock(&omp_queue->lock);
+  // @Note：如果执行器线程的个数大于2时，此处的逻辑可能不正确，需要修改temp->count ！= 0分支的代码逻辑
+  if(temp->count == 0){
+    // 从线程执行此函数，主要目的是回收任务节点，不可能执行下一分支
+    // pthread_mutex_unlock(&omp_queue->lock);
+    // 此时任务节点的内容执行完毕，需要唤醒因任务节点同步而等待的omp主线程
+    if(temp->reclaim_flag == true){
+      // 说明omp主线程进入堵塞状态，因此需要唤醒omp主线程
+      pthread_cond_signal(&temp->cond);
+      // uint64_t cur_time = get_clocktime();
+      // printf("|TID:%ld|-->[After  signal:%lu]-->[temp_ptr:%p]\n", Tid, cur_time, (void*)temp);
+    }else{
+      // 说明omp主线程未进入堵塞状态，说明从线程比主线程先执行完毕，只需要回收任务节点即可
+      temp->reclaim_flag = true;
+    }
+    pthread_mutex_unlock(&temp->lock);
+    pthread_mutex_lock(&pool_lock);
+    // 回收任务节点，@Mark：node_pool的访问和修改可能需要加锁
     temp->pre = node_pool;
     temp->next = node_pool->next;
-    node_pool->next->pre = temp;
+    if(node_pool->next != NULL){
+      node_pool->next->pre = temp;
+    }
     node_pool->next = temp;
+    pthread_mutex_unlock(&pool_lock);
+    // printf("|TID:%ld|-->[return dequeue1]\n", Tid);
+  }else{
+
   }
-  pthread_mutex_unlock(&pool_lock);
 }
 ialias (dequeue1)
 
