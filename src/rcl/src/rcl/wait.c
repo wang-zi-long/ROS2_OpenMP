@@ -577,8 +577,8 @@ rcl_wait(rcl_wait_set_t * wait_set, int64_t timeout)
     }
   }
 
-// int strategy = get_strategy();
-// if(strategy != 2){
+int strategy = get_strategy();
+if(strategy != 2){
   if (timeout == 0) {
     // Then it is non-blocking, so set the temporary storage to 0, 0 and pass it.
     temporary_timeout_storage.sec = 0;
@@ -593,11 +593,11 @@ rcl_wait(rcl_wait_set_t * wait_set, int64_t timeout)
     temporary_timeout_storage.nsec = min_timeout % 1000000000;
     timeout_argument = &temporary_timeout_storage;
   }
-// }else{
-//   temporary_timeout_storage.sec = 0;
-//   temporary_timeout_storage.nsec = 0;
-//   timeout_argument = &temporary_timeout_storage;
-// }
+}else{
+  temporary_timeout_storage.sec = 0;
+  temporary_timeout_storage.nsec = 0;
+  timeout_argument = &temporary_timeout_storage;
+}
 
   // Wait.
   rmw_ret_t ret = rmw_wait(

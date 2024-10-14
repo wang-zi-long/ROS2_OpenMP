@@ -92,6 +92,7 @@ void openmp_init(){
 		CPU_ZERO(&cpuset);
 		CPU_SET(0, &cpuset);
 		CPU_SET(1, &cpuset);
+    CPU_SET(2, &cpuset);
 		int result = pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
 		if (result != 0) {
 			perror("pthread_setaffinity_np");
@@ -130,15 +131,14 @@ MultiThreadedExecutor::run(size_t this_thread_number)
   (void)this_thread_number;
 
   int strategy = get_strategy();
-  if(strategy == 1){
-    openmp_init();
-  }else{
+  if(strategy == 0){
     pthread_t current_thread = pthread_self();
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
     // @Noted：暂时为每个执行器线程绑定单独的CPU核心
     CPU_SET(0, &cpuset);
     CPU_SET(1, &cpuset);
+    CPU_SET(2, &cpuset);
     int result = pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
     if (result != 0) {
       perror("pthread_setaffinity_np");
@@ -152,12 +152,43 @@ MultiThreadedExecutor::run(size_t this_thread_number)
     long int tid = syscall(SYS_gettid);
     std::string command = "sudo chrt -f -p 50 " + std::to_string(tid);
     system(command.c_str());
+  }else if(strategy == 1){
+    openmp_init();
+  }else if(strategy == 2){
+    pthread_t current_thread = pthread_self();
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    // @Noted：暂时为每个执行器线程绑定单独的CPU核心
+    CPU_SET(0, &cpuset);
+    CPU_SET(1, &cpuset);
+    CPU_SET(2, &cpuset);
+    int result = pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
+    if (result != 0) {
+      perror("pthread_setaffinity_np");
+      exit(EXIT_FAILURE);
+    }
+    CPU_ZERO(&cpuset);
+    if (pthread_getaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset) != 0) {
+      perror("pthread_getaffinity_np");
+      exit(EXIT_FAILURE);
+    }
+    long int tid = syscall(SYS_gettid);
+    std::string command = "sudo chrt -f -p 50 " + std::to_string(tid);
+    system(command.c_str());
+    set_tid_map(tid, this_thread_number);
   }
+
+  long int tid = syscall(SYS_gettid);
+  uint64_t cur_time;
 
   while (rclcpp::ok(this->context_) && spinning.load()) {
     rclcpp::AnyExecutable any_exec;
     {
-      std::lock_guard wait_lock{wait_mutex_};
+      // cur_time = get_clocktime();
+      // printf("|TID:%ld|-->|Before          wait_lock:%lu|\n", tid, cur_time);
+      // std::lock_guard wait_lock{wait_mutex_};
+      // cur_time = get_clocktime();
+      // printf("|TID:%ld|-->|After           wait_lock:%lu|\n", tid, cur_time);
       if (!rclcpp::ok(this->context_) || !spinning.load()) {
         return;
       }
@@ -170,23 +201,16 @@ MultiThreadedExecutor::run(size_t this_thread_number)
     }
 
     if(strategy == 2){
-      // 执行一个新的就绪回调之前，应当首先查看omp队列
-      // @Note@：omp主线程在执行就绪回调时，主动将任务节点加入omp队列中，因此，只要主动查看omp队列，这个执行器线程就是omp从线程
-      // 如果omp队列不为空，说明omp主线程已经将任务节点加入omp队列中，并且omp主线程有可能已经进入堵塞状态，
-      // 因此，另一个执行器线程应该先执行omp队列中的任务节点，从而解放omp主线程，然后执行wait_set中的就绪回调
-      // @Mark：（1）omp队列应该是（无锁）优先级队列；（2）omp队列中的任务节点优先级与执行器线程将要执行的就绪回调的优先级有个比较？？？
-      // long int tid = syscall(SYS_gettid);
-      // uint64_t cur_time = get_clocktime();
-      // printf("|TID:%ld|-->|After get_next_executable:%lu|\n", tid, cur_time);
       omp_Node *temp = dequeue();
-      if(temp != NULL){
-        // cur_time = get_clocktime();
-        // printf("|TID:%ld|-->|omp_queue is not    empty:%lu|\n", tid, cur_time);
+      // 执行器线程进入omp从线程状态后，从omp队列中出队的任务节点的优先级，不可能比将要执行的就绪回调的优先级更低
+      while(temp != NULL){
         temp->fn(temp->data);
-        // 执行器线程不可能卡在此处，因为此时的执行器线程只能是omp从线程
+        // cur_time = get_clocktime();
+        // printf("|TID:%ld|-->|Before    execute_any_exe:%lu|\n", tid, cur_time);
         dequeue1(temp);
+        temp = dequeue();
       }
-      int value = priority.load();
+      long int value = priority.load();
       ++ priority;
       set_priority(this_thread_number, value);
     }

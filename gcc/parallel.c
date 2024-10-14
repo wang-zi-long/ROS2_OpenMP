@@ -199,12 +199,6 @@ int getcpu_via_syscall(void) {
     return (int)cpu;
 }
 
-bool help_flag;
-bool helpflag(){
-  return help_flag;
-}
-ialias(helpflag)
-
 int strategy = -1;
 void set_strategy(int temp){
   strategy = temp;
@@ -223,7 +217,7 @@ ialias(set_executor_num)
 
 #define max_executor_num  10
 int priority[max_executor_num];
-void set_priority(int executor_id, uint64_t pri){
+void set_priority(int executor_id, long int pri){
   priority[executor_id] = pri;
 }
 ialias(set_priority)
@@ -256,6 +250,45 @@ void set_tid_map(long int tid, int executor_id){
 }
 ialias(set_tid_map)
 
+// #define PRI_MAX_NUM 10
+typedef struct pri_count_node{
+  int priority;
+  int count;
+  struct pri_count_node *next;
+}pri_count_node;
+pri_count_node* pri_count;
+pthread_mutex_t pri_count_lock;
+pthread_cond_t wait_cond;
+
+// omp主线程执行
+void pri_count_handle1(int priority){
+  pthread_mutex_lock(&pri_count_lock);
+  pri_count_node* pre = pri_count;
+  while (pre->next != NULL && pre->next->priority != priority){
+    pre = pre->next;
+  }
+  if(pre->next == NULL){
+    long int Tid = syscall(SYS_gettid);
+    printf("|TID:%ld|Find pri_count failed!!!\n", Tid);
+    return;
+  }
+  if(pre->next->count == 0){
+    pri_count_node* temp = pre->next;
+    pre->next = temp->next;
+    free(temp);
+  }else{
+    pthread_cond_wait(&wait_cond, &pri_count_lock);
+  }
+  pthread_mutex_unlock(&pri_count_lock);
+}
+
+pthread_mutex_t queue_lock;
+omp_Node *queue;
+// 通过锁从node_pool里互斥申请和回收任务节点
+#define node_pool_num 20
+pthread_mutex_t pool_lock;
+omp_Node* node_pool;
+
 void
 GOMP_parallel (void (*fn) (void *), void *data, unsigned num_threads,
 	       unsigned int flags)
@@ -278,27 +311,51 @@ GOMP_parallel (void (*fn) (void *), void *data, unsigned num_threads,
       printf("Find executor_id failed!!!\n");
     }
     int pri = priority[executor_id];
-
-    help_flag = true;
     enqueue(fn, data, pri, executor_num);
-    help_flag = false;
 
     omp_Node * temp = dequeue2(pri);
     while (temp != NULL)
     {
       temp->fn(temp->data);
-      dequeue1(temp);
+      {
+        int priority = temp->priority;
+        pthread_mutex_lock(&pri_count_lock);
+        pri_count_node* pre = pri_count;
+        while (pre->next != NULL && pre->next->priority != priority){
+          pre = pre->next;
+        }
+        if(pre->next == NULL){
+          printf("Find pri_count failed!!!\n");
+          pthread_mutex_unlock(&pri_count_lock);
+          return;
+        }else{
+          pre->next->count--;
+          if(pre->next->count == 0 && priority != pri){
+            // 在这种情况下，omp主线程充当omp从线程的角色，需要唤醒其他因执行更高优先级回调而陷入堵塞的omp主线程
+            // omp主线程不需要自己唤醒自己
+            pri_count_node* temp = pre->next;
+            pre->next = temp->next;
+            free(temp);
+            pthread_cond_signal(&wait_cond);
+          }
+          pthread_mutex_unlock(&pri_count_lock);
+        }
+        pthread_mutex_lock(&pool_lock);
+        if(node_pool->pre == node_pool->next && node_pool->pre == NULL){
+          node_pool->pre = node_pool->next = temp;
+        }else{
+          temp->pre = node_pool;
+          temp->next = node_pool->next;
+          node_pool->next->pre = temp;
+          node_pool->next = temp;
+        }
+        pthread_mutex_unlock(&pool_lock);
+      }
       temp = dequeue2(pri);
     }
+    pri_count_handle1(pri);
   }
 }
-
-pthread_mutex_t queue_lock;
-omp_Node *queue;
-// 通过锁从node_pool里互斥申请和回收任务节点
-#define node_pool_num 20
-pthread_mutex_t pool_lock;
-omp_Node* node_pool;
 
 void omp_queue_init(){
   queue = (omp_Node*)malloc(sizeof(omp_Node));
@@ -308,6 +365,7 @@ void omp_queue_init(){
   node_pool = (omp_Node*)malloc(sizeof(omp_Node));
   node_pool->pre = NULL;
   node_pool->next = NULL;
+  pthread_mutex_init(&pool_lock, NULL);
   for(int i = 0;i < node_pool_num;++i){
     omp_Node* temp = (omp_Node*)malloc(sizeof(omp_Node));
     if(i == 0){
@@ -324,13 +382,23 @@ void omp_queue_init(){
     pthread_mutex_init(&temp->lock, NULL);
     pthread_cond_init(&temp->cond, NULL);
   }
-  help_flag = false;
   Table = (Entry*)malloc(sizeof(Entry));
   Table->next = NULL;
+  pthread_mutex_init(&pri_count_lock, NULL);
+  pri_count = (pri_count_node*)malloc(sizeof(pri_count_node));
+  pri_count->next = NULL;
+  pthread_cond_init(&wait_cond, NULL);
 }
 ialias (omp_queue_init)
 
 void enqueue(void (*fn) (void *), void *data, int priority, int executor_num) {
+  pthread_mutex_lock(&pri_count_lock);
+  pri_count_node* temp = (pri_count_node*)malloc(sizeof(pri_count_node));
+  temp->priority = priority;
+  temp->count = executor_num;
+  temp->next = pri_count->next;
+  pri_count->next = temp;
+  pthread_mutex_unlock(&pri_count_lock);
   for(int i = 0;i < executor_num;++i){
     pthread_mutex_lock(&pool_lock);
     omp_Node* temp;
@@ -360,14 +428,16 @@ void enqueue(void (*fn) (void *), void *data, int priority, int executor_num) {
       temp->pre = queue;
       temp->next = queue;
     }else{
-      omp_Node* pre = queue;
-      while(pre->next != NULL && pre->next->priority <= temp->priority){
-        pre = pre->next;
+      omp_Node* q_pre = queue;
+      // 按照priority的值递增，将任务节点加入omp队列中
+      // priority的值越大，优先级越低，因此，omp队列的优先级实际上是递减的
+      while(q_pre->next != queue && q_pre->next->priority <= temp->priority){
+        q_pre = q_pre->next;
       }
-      temp->next = queue->next;
-      temp->pre = queue;
-      temp->next->pre = temp;
-      queue->next = temp;
+      temp->next = q_pre->next;
+      q_pre->next->pre = temp;
+      q_pre->next = temp;
+      temp->pre = q_pre;
     }
     pthread_mutex_unlock(&queue_lock);
   }
@@ -419,6 +489,26 @@ omp_Node* dequeue2(int priority) {
 ialias (dequeue2)
 
 void dequeue1(omp_Node *temp){
+  pthread_mutex_lock(&pri_count_lock);
+  int priority = temp->priority;
+  pri_count_node* pre = pri_count;
+  while (pre->next != NULL && pre->next->priority != priority){
+    pre = pre->next;
+  }
+  if(pre->next == NULL){
+    printf("Find pri_count failed!!!\n");
+    pthread_mutex_unlock(&pri_count_lock);
+    return;
+  }else{
+    pre->next->count--;
+    if(pre->next->count == 0){
+      pri_count_node* temp = pre->next;
+      pre->next = temp->next;
+      free(temp);
+      pthread_cond_signal(&wait_cond);
+    }
+    pthread_mutex_unlock(&pri_count_lock);
+  }
   pthread_mutex_lock(&pool_lock);
   if(node_pool->pre == node_pool->next && node_pool->pre == NULL){
     node_pool->pre = node_pool->next = temp;

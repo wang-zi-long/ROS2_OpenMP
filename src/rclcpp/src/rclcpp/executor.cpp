@@ -19,7 +19,7 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
-
+#include <mutex>
 #include "rcl/allocator.h"
 #include "rcl/error_handling.h"
 #include "rcpputils/scope_exit.hpp"
@@ -922,9 +922,11 @@ uint64_t get_clocktime1() {
     return all;  
 }
 
+std::mutex wait_mutex;
 bool
 Executor::get_next_executable(AnyExecutable & any_executable, std::chrono::nanoseconds timeout)
 {
+  std::unique_lock<std::mutex> wait_lock{wait_mutex};
   bool success = false;
   // Check to see if there are any subscriptions or timers needing service
   // TODO(wjwwood): improve run to run efficiency of this function
@@ -940,23 +942,16 @@ Executor::get_next_executable(AnyExecutable & any_executable, std::chrono::nanos
       // printf("|TID:%ld|-->|Before      wait_for_work:%lu|\n", tid, cur_time);
       omp_Node *temp = dequeue();
       if(temp != NULL){
-        // cur_time = get_clocktime1();
-        // printf("|TID:%ld|-->|omp_queue is not    empty:%lu|\n", tid, cur_time);
+        wait_lock.unlock();
         temp->fn(temp->data);
         dequeue1(temp);
-      }else if(helpflag() == true){
-        // omp主线程暂时还未入队完毕，但是需要omp从线程的帮助，所以执行器线程再查看一次omp队列
-        while (helpflag() == true)
-        {
+        temp = dequeue();
+        while(temp != NULL){
+          temp->fn(temp->data);
+          dequeue1(temp);
           temp = dequeue();
-          if(temp != NULL){
-            // cur_time = get_clocktime1();
-            // printf("|TID:%ld|-->|omp_queue is not    empty!!!!!:%lu|\n", tid, cur_time);
-            temp->fn(temp->data);
-            dequeue1(temp);
-            break;
-          }
         }
+        wait_lock.lock();
       }
     }
 
@@ -968,6 +963,7 @@ Executor::get_next_executable(AnyExecutable & any_executable, std::chrono::nanos
     // Try again
     success = get_next_ready_executable(any_executable);
   }
+  wait_lock.unlock();
   return success;
 }
 
