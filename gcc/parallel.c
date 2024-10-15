@@ -256,6 +256,7 @@ typedef struct pri_count_node{
   int count;
   struct pri_count_node *next;
 }pri_count_node;
+
 pri_count_node* pri_count;
 pthread_mutex_t pri_count_lock;
 pthread_cond_t wait_cond;
@@ -270,6 +271,7 @@ void pri_count_handle1(int priority){
   if(pre->next == NULL){
     long int Tid = syscall(SYS_gettid);
     printf("|TID:%ld|Find pri_count failed!!!\n", Tid);
+    pthread_mutex_unlock(&pri_count_lock);
     return;
   }
   if(pre->next->count == 0){
@@ -319,13 +321,14 @@ GOMP_parallel (void (*fn) (void *), void *data, unsigned num_threads,
       temp->fn(temp->data);
       {
         int priority = temp->priority;
+        
         pthread_mutex_lock(&pri_count_lock);
         pri_count_node* pre = pri_count;
         while (pre->next != NULL && pre->next->priority != priority){
           pre = pre->next;
         }
         if(pre->next == NULL){
-          printf("Find pri_count failed!!!\n");
+          printf("Find pri_count failed!!!111\n");
           pthread_mutex_unlock(&pri_count_lock);
           return;
         }else{
@@ -340,6 +343,7 @@ GOMP_parallel (void (*fn) (void *), void *data, unsigned num_threads,
           }
           pthread_mutex_unlock(&pri_count_lock);
         }
+
         pthread_mutex_lock(&pool_lock);
         if(node_pool->pre == node_pool->next && node_pool->pre == NULL){
           node_pool->pre = node_pool->next = temp;
@@ -399,6 +403,7 @@ void enqueue(void (*fn) (void *), void *data, int priority, int executor_num) {
   temp->next = pri_count->next;
   pri_count->next = temp;
   pthread_mutex_unlock(&pri_count_lock);
+
   for(int i = 0;i < executor_num;++i){
     pthread_mutex_lock(&pool_lock);
     omp_Node* temp;
@@ -496,7 +501,7 @@ void dequeue1(omp_Node *temp){
     pre = pre->next;
   }
   if(pre->next == NULL){
-    printf("Find pri_count failed!!!\n");
+    printf("Find pri_count failed!!!222\n");
     pthread_mutex_unlock(&pri_count_lock);
     return;
   }else{

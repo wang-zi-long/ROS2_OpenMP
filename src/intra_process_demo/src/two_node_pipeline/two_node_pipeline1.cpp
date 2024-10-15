@@ -83,6 +83,8 @@ int main(int argc, char * argv[])
 #endif
 #endif
 
+  rclcpp::GuardCondition(Sensor);
+
   executor.spin();
 
   rclcpp::shutdown();

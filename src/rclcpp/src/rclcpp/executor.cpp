@@ -940,9 +940,9 @@ Executor::get_next_executable(AnyExecutable & any_executable, std::chrono::nanos
       // long int tid = syscall(SYS_gettid);
       // uint64_t cur_time = get_clocktime1();
       // printf("|TID:%ld|-->|Before      wait_for_work:%lu|\n", tid, cur_time);
+      wait_lock.unlock();
       omp_Node *temp = dequeue();
       if(temp != NULL){
-        wait_lock.unlock();
         temp->fn(temp->data);
         dequeue1(temp);
         temp = dequeue();
@@ -951,8 +951,8 @@ Executor::get_next_executable(AnyExecutable & any_executable, std::chrono::nanos
           dequeue1(temp);
           temp = dequeue();
         }
-        wait_lock.lock();
       }
+      wait_lock.lock();
     }
 
     // Wait for subscriptions or timers to work on
