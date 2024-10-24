@@ -27,7 +27,7 @@
 #include <sys/syscall.h>
 #include <string>
 #include <cstdlib>
-#include "/home/neu/Desktop/OpenMP/src/intra_process_demo/include/conf.hpp"
+#include "/home/neu/Desktop/Openmp/src/intra_process_demo/include/conf.hpp"
 #include "/usr/local/lib/gcc/x86_64-pc-linux-gnu/15.0.0/include/omp.h"
 #include <unistd.h>
 #include <time.h>
@@ -83,7 +83,7 @@ MultiThreadedExecutor::get_number_of_threads()
   return number_of_threads_;
 }
 
-void openmp_init(){
+void openmp_init(int this_thread_number){
   #pragma omp parallel num_threads(OPENMP_THREAD_NUM)
 	{
 		pthread_t current_thread = pthread_self();
@@ -92,7 +92,9 @@ void openmp_init(){
 		CPU_ZERO(&cpuset);
 		CPU_SET(0, &cpuset);
 		CPU_SET(1, &cpuset);
-    CPU_SET(2, &cpuset);
+    // CPU_SET(2, &cpuset);
+    // CPU_SET(3, &cpuset);
+    // CPU_SET(4, &cpuset);
 		int result = pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
 		if (result != 0) {
 			perror("pthread_setaffinity_np");
@@ -106,6 +108,8 @@ void openmp_init(){
 		long int tid = syscall(SYS_gettid);
 		std::string command = "sudo chrt -f -p 50 " + std::to_string(tid);
 		system(command.c_str());
+
+    printf("|%d|%ld|\n", this_thread_number, tid);
 	}
 }
 
@@ -136,9 +140,12 @@ MultiThreadedExecutor::run(size_t this_thread_number)
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
     // @Noted：暂时为每个执行器线程绑定单独的CPU核心
+    // CPU_SET(this_thread_number, &cpuset);
     CPU_SET(0, &cpuset);
     CPU_SET(1, &cpuset);
     CPU_SET(2, &cpuset);
+    CPU_SET(3, &cpuset);
+    // CPU_SET(4, &cpuset);
     int result = pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
     if (result != 0) {
       perror("pthread_setaffinity_np");
@@ -153,7 +160,7 @@ MultiThreadedExecutor::run(size_t this_thread_number)
     std::string command = "sudo chrt -f -p 50 " + std::to_string(tid);
     system(command.c_str());
   }else if(strategy == 1){
-    openmp_init();
+    openmp_init(this_thread_number);
   }else if(strategy == 2){
     pthread_t current_thread = pthread_self();
     cpu_set_t cpuset;
@@ -162,6 +169,8 @@ MultiThreadedExecutor::run(size_t this_thread_number)
     CPU_SET(0, &cpuset);
     CPU_SET(1, &cpuset);
     CPU_SET(2, &cpuset);
+    CPU_SET(3, &cpuset);
+    // CPU_SET(4, &cpuset);
     int result = pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
     if (result != 0) {
       perror("pthread_setaffinity_np");
@@ -173,13 +182,13 @@ MultiThreadedExecutor::run(size_t this_thread_number)
       exit(EXIT_FAILURE);
     }
     long int tid = syscall(SYS_gettid);
-    std::string command = "sudo chrt -f -p 50 " + std::to_string(tid);
-    system(command.c_str());
+    // std::string command = "sudo chrt -f -p 50 " + std::to_string(tid);
+    // system(command.c_str());
     set_tid_map(tid, this_thread_number);
   }
 
   long int tid = syscall(SYS_gettid);
-  uint64_t cur_time;
+  uint64_t cur_time = 0;
 
   while (rclcpp::ok(this->context_) && spinning.load()) {
     rclcpp::AnyExecutable any_exec;
@@ -215,6 +224,8 @@ MultiThreadedExecutor::run(size_t this_thread_number)
       set_priority(this_thread_number, value);
     }
 
+    // cur_time = get_clocktime();
+    // printf("|Tid:%ld|execute_any_executable:%ld\n", tid, cur_time);
     // 就绪回调的执行可能用到omp，因此传入一个
     execute_any_executable(any_exec);
 

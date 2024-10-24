@@ -85,13 +85,13 @@ int main(int argc, char * argv[])
     // printf("Chain %d : %dms | %d\t%d\t%d\n", i, (period), exe1, exe2, exe3);
 
     Timer.push_back(make_shared<Sensor>("Timer" + to_string(i), "CHAIN" + to_string(i) + "_TIMER_OUT", i, 1, is_openmp == 2 ? (exe1 * 10 / OPENMP_THREAD_NUM) : (exe1 * 10), period_ms, 
-                    is_openmp == 0 ? false : true, is_openmp == 2 ? (1 + (10 - i) * 10) : 0));
+                    is_openmp == 0 ? false : true, is_openmp == 2 ? (1 + (10 - i) * 10) : 0, executor));
     executor.add_node(Timer.back());
     Trans.push_back(make_shared<Transfer>("Transfer" + to_string(i), "CHAIN" + to_string(i) + "_TIMER_OUT", "CHAIN" + to_string(i) + "_SUB_OUT", i, 2, is_openmp == 2 ? (exe2 * 10 / OPENMP_THREAD_NUM) : (exe2 * 10), 
-                    is_openmp == 0 ? false : true, is_openmp == 2 ? (2 + (10 - i) * 10) : 0));
+                    is_openmp == 0 ? false : true, is_openmp == 2 ? (2 + (10 - i) * 10) : 0, executor));
     executor.add_node(Trans.back());
     Sub.push_back(make_shared<Command>("Sub" + to_string(i), "CHAIN" + to_string(i) + "_SUB_OUT", i, 3, is_openmp == 2 ? (exe3 * 10 / OPENMP_THREAD_NUM) : (exe3 * 10), 
-                    is_openmp == 0 ? false : true, is_openmp == 2 ? (3 + (10 - i) * 10) : 0));
+                    is_openmp == 0 ? false : true, is_openmp == 2 ? (3 + (10 - i) * 10) : 0, executor));
     executor.add_node(Sub.back());
   }
 

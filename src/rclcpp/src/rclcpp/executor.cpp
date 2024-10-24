@@ -515,6 +515,17 @@ Executor::set_memory_strategy(rclcpp::memory_strategy::MemoryStrategy::SharedPtr
 }
 
 void
+Executor::trigger_interrupt_guard(){
+  try {
+    interrupt_guard_condition_.trigger();
+  } catch (const rclcpp::exceptions::RCLError & ex) {
+    throw std::runtime_error(
+            std::string(
+              "Failed to trigger guard condition from execute_any_executable: ") + ex.what());
+  }
+}
+
+void
 Executor::execute_any_executable(AnyExecutable & any_exec)
 {
   if (!spinning.load()) {
@@ -926,7 +937,15 @@ std::mutex wait_mutex;
 bool
 Executor::get_next_executable(AnyExecutable & any_executable, std::chrono::nanoseconds timeout)
 {
+  // long int tid = syscall(SYS_gettid);
+  // uint64_t cur_time = get_clocktime1();
+  // printf("|Tid:%ld|Before wait_lock:%ld\n", tid, cur_time);
+
   std::unique_lock<std::mutex> wait_lock{wait_mutex};
+
+  // cur_time = get_clocktime1();
+  // printf("|Tid:%ld|after wait_lock:%ld\n", tid, cur_time);
+
   bool success = false;
   // Check to see if there are any subscriptions or timers needing service
   // TODO(wjwwood): improve run to run efficiency of this function
@@ -953,17 +972,34 @@ Executor::get_next_executable(AnyExecutable & any_executable, std::chrono::nanos
         }
       }
       wait_lock.lock();
+      set_wait_for_work_flag(true);
     }
 
+    // cur_time = get_clocktime1();
+    // printf("|Tid:%ld|Before wait_for_work:%ld\n", tid, cur_time);
     // Wait for subscriptions or timers to work on
     wait_for_work(timeout);
+    // cur_time = get_clocktime1();
+    // printf("|Tid:%ld|After  wait_for_work:%ld\n", tid, cur_time);
+
+    if(get_strategy() == 2){
+      set_wait_for_work_flag(false);
+    }
+
     if (!spinning.load()) {
       return false;
     }
     // Try again
     success = get_next_ready_executable(any_executable);
   }
+
+  // cur_time = get_clocktime1();
+  // printf("|Tid:%ld|Before unlock:%ld\n", tid, cur_time);
+
   wait_lock.unlock();
+
+  // cur_time = get_clocktime1();
+  // printf("|Tid:%ld|After  unlock:%ld\n", tid, cur_time);
   return success;
 }
 

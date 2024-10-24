@@ -43,58 +43,50 @@ void dummy_load_ms(int load_ms) {
           __asm__ volatile ("nop");
 }
 
-void dummy_load_100us(int load_100us, bool use_openmp) {
+void dummy_load_100us(int load_100us) {
   volatile uint64_t i, j;
-  if(use_openmp){
-    #pragma omp parallel private(i) num_threads(OPENMP_THREAD_NUM)
-    {
-      volatile uint64_t start = get_clocktime();
-      long int tid = syscall(SYS_gettid);
+  for (j = 0; j < (dummy_load_calib * load_100us /10); j++)
+    for (i = 0 ; i < DUMMY_LOAD_ITER; i++) 
+        __asm__ volatile ("nop");
+}
 
-      #pragma omp for
-      for (j = 0; j < (dummy_load_calib * load_100us /10); j++)
-        for (i = 0 ; i < DUMMY_LOAD_ITER; i++) 
-            __asm__ volatile ("nop");
-
-      volatile uint64_t end = get_clocktime();
-      printf("|TID:%ld|-->[Start@%lu-End@%lu-Cost:%lu(ns)]\n", tid, start, end, end - start);
-    }
-  }else{
-    for (j = 0; j < (dummy_load_calib * load_100us /10); j++)
-      for (i = 0 ; i < DUMMY_LOAD_ITER; i++) 
+void dummy_load_100us_omp(int load_100us) {
+  #pragma omp parallel for num_threads(OPENMP_THREAD_NUM)
+  for (uint64_t j = 0; j < (dummy_load_calib * (load_100us) / 10); j++){
+      if(j == 0){
+        long int tid = syscall(SYS_gettid);
+        int cpu_core = sched_getcpu();
+        printf("|Tid:%ld|-->|On:%d|111\n", tid, cpu_core);
+      }
+      for (uint64_t i = 0; i < DUMMY_LOAD_ITER; i++) {
           __asm__ volatile ("nop");
+      }
+      if(j == (dummy_load_calib * (load_100us) / 10) - 1){
+        long int tid = syscall(SYS_gettid);
+        int cpu_core = sched_getcpu();
+        printf("|Tid:%ld|-->|On:%d|222\n", tid, cpu_core);
+      }
   }
 }
 
-void dummy_load_100us_new(int load_100us, bool use_openmp, int chain_idx, int node_idx, uint32_t data) {
+void dummy_load_100us_new(int load_100us, bool use_openmp, int chain_idx, int node_idx, uint32_t data, rclcpp::executors::MultiThreadedExecutor &executor) {
   if(use_openmp){
-    uint64_t start1, end1;
-    // 执行到此处的执行器线程，只能成为omp主线程
-    // @Note@：当存在多条任务链时，另一个执行器线程可能正在执行就绪回调，是否需要监控一下另一个执行器线程的执行状态？？？
-    #pragma omp parallel for private(start1, end1) num_threads(OPENMP_THREAD_NUM)
-    for (uint64_t j = 0; j < (dummy_load_calib * load_100us / 10); j++){
-
-        // if(j == 0){
-        //     start1 = get_clocktime();
-        // }
-        
-        for (int i = 0; i < DUMMY_LOAD_ITER; i++) {
-            __asm__ volatile ("nop");
+    int strategy = get_strategy();
+    for(int k = 0;k < OMP_NUM; ++k){
+      // uint64_t i,j;
+      #pragma omp parallel for num_threads(OPENMP_THREAD_NUM)
+      for (uint64_t j = 0; j < (dummy_load_calib * (load_100us / OMP_NUM) / 10); j++){
+          for (uint64_t i = 0; i < DUMMY_LOAD_ITER; i++) {
+              __asm__ volatile ("nop");
+          }
+      }
+      if(strategy == 2){
+        if(get_wait_for_work_flag() == true){
+          executor.trigger_interrupt_guard();
         }
-
-        // if(j == (((dummy_load_calib * load_100us / 10) - 1 ))){
-        //   end1 = get_clocktime();
-        //   long int Tid = syscall(SYS_gettid);
-        //   int cpu_core = sched_getcpu();
-        //   printf("|TID:%ld|-->[Chain%u-Node%u.exe:%u(100us).on:%d]-->[Start@%lu-End@%lu-Cost:%lu(ns) and Published msg: %d]\n",
-        //            Tid, chain_idx, node_idx, load_100us, cpu_core, start1, end1, end1 - start1, data);
-        // }
+        dequeue3();
+      }
     }
-    // long int Tid = syscall(SYS_gettid);
-    // int cpu_core = sched_getcpu();
-    // uint64_t current_time  = get_clocktime();
-    // printf("|TID:%ld|-->[Chain%u-Node%u.exe:%u(100us).on:%d]-->[After parallel:%lu and Published msg: %d]\n",
-    //             Tid, chain_idx, node_idx, load_100us, cpu_core, current_time, data);
   }else{
     uint64_t i,j;
     for (j = 0; j < (dummy_load_calib * load_100us /10); j++)
@@ -127,14 +119,12 @@ void dummy_load_calibration() {
 int cnter_val[5] = {0, 0, 0, 0, 0};
 
 struct Sensor : public rclcpp::Node {
-  Sensor(const std::string & node_name, const std::string & output_topic, uint32_t chain_idx, uint32_t node_idx, uint32_t exe_time_100us, std::chrono::duration<int,std::milli> period_ms, bool use_openmp, int priority)
-  : Node(node_name, rclcpp::NodeOptions().use_intra_process_comms(true)) {
+  Sensor(const std::string & node_name, const std::string & output_topic, uint32_t chain_idx, uint32_t node_idx, uint32_t exe_time_100us, std::chrono::duration<int,std::milli> period_ms, bool use_openmp, rclcpp::executors::MultiThreadedExecutor &executor)
+  : Node(node_name, rclcpp::NodeOptions().use_intra_process_comms(false)) {
     pub_ = this->create_publisher<std_msgs::msg::Int32>(output_topic, 10);
     std::weak_ptr<std::remove_pointer<decltype(pub_.get())>::type> captured_pub = pub_;
-    auto callback = [captured_pub, node_idx, chain_idx, exe_time_100us, use_openmp, priority]() -> void {
-
+    auto callback = [this, captured_pub, node_idx, chain_idx, exe_time_100us, use_openmp, &executor]() -> void {
         long int tid = syscall(SYS_gettid);
-
         // if(priority != 0){
         //   // 修改执行器线程以及OpenMP线程的优先级
         //   if(use_openmp){
@@ -148,7 +138,6 @@ struct Sensor : public rclcpp::Node {
         //     system(command.c_str());
         //   }
         // }
-
         auto pub_ptr = captured_pub.lock();
         if (!pub_ptr) {
           return;
@@ -157,12 +146,9 @@ struct Sensor : public rclcpp::Node {
         std_msgs::msg::Int32::UniquePtr msg(new std_msgs::msg::Int32());
         msg->data = cnter_val[chain_idx-1]++;
 
-        // pub_ptr->publish(std::move(msg));
-
         volatile uint64_t ts_start = get_clocktime();
-        // dummy_load_100us(exe_time_100us, use_openmp);
-        dummy_load_100us_new(exe_time_100us, use_openmp, chain_idx, node_idx, msg->data);
-        volatile uint64_t ts_end = get_clocktime();  
+        dummy_load_100us(exe_time_100us);
+        volatile uint64_t ts_end = get_clocktime();
         int cpu_core = sched_getcpu();
 
         printf("|TID:%ld|-->[Chain%u-Sensor%u.exe:%u(100us).on:%d]-->[Start@%lu-End@%lu-Cost:%lu(ns) and Published msg: %d]. \r\n\n", 
@@ -194,14 +180,15 @@ struct Sensor : public rclcpp::Node {
 
 /// MARK: Transfer Node structure definition.
 struct Transfer : public rclcpp::Node {
-  Transfer(const std::string & node_name, const std::string & input_topic, const std::string & output_topic, uint32_t chain_idx, uint32_t node_idx, uint32_t exe_time_100us, bool use_openmp, int priority)
-  : Node(node_name, rclcpp::NodeOptions().use_intra_process_comms(true)) {
+  Transfer(const std::string & node_name, const std::string & input_topic, const std::string & output_topic, uint32_t chain_idx, uint32_t node_idx, uint32_t exe_time_100us, bool use_openmp,
+   rclcpp::executors::MultiThreadedExecutor &executor)
+  : Node(node_name, rclcpp::NodeOptions().use_intra_process_comms(false)) {
     pub_ = this->create_publisher<std_msgs::msg::Int32>(output_topic, 10);
     std::weak_ptr<std::remove_pointer<decltype(pub_.get())>::type> captured_pub = pub_;
     sub_ = this->create_subscription<std_msgs::msg::Int32>(
       input_topic,
       10,
-      [captured_pub, node_idx, chain_idx, exe_time_100us, use_openmp, priority](std_msgs::msg::Int32::UniquePtr msg) {
+      [this, captured_pub, node_idx, chain_idx, exe_time_100us, use_openmp, &executor](std_msgs::msg::Int32::UniquePtr msg) {
           
           long int tid = syscall(SYS_gettid);
 
@@ -225,9 +212,7 @@ struct Transfer : public rclcpp::Node {
             return;
           }
 
-          // std::thread::id thread_id = std::this_thread::get_id();
-          // dummy_load_100us(exe_time_100us, use_openmp);
-          dummy_load_100us_new(exe_time_100us, use_openmp, chain_idx, node_idx, msg->data);
+          dummy_load_100us_new(exe_time_100us, use_openmp, chain_idx, node_idx, msg->data, executor);
           volatile uint64_t ts_end = get_clocktime();
           int cpu_core = sched_getcpu();
 
@@ -258,12 +243,12 @@ struct Transfer : public rclcpp::Node {
 
 /// MARK: Command Node structure definition.
 struct Command : public rclcpp::Node {
-  Command(const std::string & node_name, const std::string & input_topic, uint32_t chain_idx, uint32_t node_idx, uint32_t exe_time_100us, bool use_openmp, int priority)
-  : Node(node_name, rclcpp::NodeOptions().use_intra_process_comms(true)) {
+  Command(const std::string & node_name, const std::string & input_topic, uint32_t chain_idx, uint32_t node_idx, uint32_t exe_time_100us, bool use_openmp, rclcpp::executors::MultiThreadedExecutor &executor)
+  : Node(node_name, rclcpp::NodeOptions().use_intra_process_comms(false)) {
     sub_ = this->create_subscription<std_msgs::msg::Int32>(
       input_topic,
       10,
-      [node_idx, chain_idx, exe_time_100us, use_openmp, priority](std_msgs::msg::Int32::UniquePtr msg) {
+      [this, node_idx, chain_idx, exe_time_100us, use_openmp,  &executor](std_msgs::msg::Int32::UniquePtr msg) {
 
           long int tid = syscall(SYS_gettid);
 
@@ -281,10 +266,9 @@ struct Command : public rclcpp::Node {
           //   }
           // }
 
+          dummy_load_100us(10 * node_idx);
           volatile uint64_t ts_start = get_clocktime();
-          // std::thread::id thread_id = std::this_thread::get_id();
-          // dummy_load_100us(exe_time_100us, use_openmp);
-          dummy_load_100us_new(exe_time_100us, use_openmp, chain_idx, node_idx, msg->data);
+          dummy_load_100us_omp(exe_time_100us);
           volatile uint64_t ts_end = get_clocktime();
           int cpu_core = sched_getcpu();
 
@@ -304,7 +288,6 @@ struct Command : public rclcpp::Node {
           //   std::string command = "sudo chrt -f -p 50 " + std::to_string(tid);
           //   system(command.c_str());
           // }
-          
       }
     );
   }

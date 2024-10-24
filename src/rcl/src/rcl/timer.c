@@ -26,7 +26,7 @@ extern "C"
 #include "rcutils/stdatomic_helper.h"
 #include "rcutils/time.h"
 #include "tracetools/tracetools.h"
-#include "/home/neu/Desktop/OpenMP/src/intra_process_demo/include/conf.hpp"
+#include "/home/neu/Desktop/Openmp/src/intra_process_demo/include/conf.hpp"
 
 struct rcl_timer_impl_s
 {

@@ -16,77 +16,43 @@
 #include <cinttypes>
 #include <cstdio>
 #include <memory>
-#include <cstring>
+#include <string>
 #include <utility>
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/int32.hpp"
 #include "node_common.hpp"
-#include "conf.hpp"
-#include <vector>
-#include <thread>
 
 using namespace std::chrono_literals;
 
-void external_event_trigger(rclcpp::GuardCondition::SharedPtr guard_condition) {
-  printf("hello world!!!\n");  // 模拟外部事件，延迟5秒触发
-  RCLCPP_INFO(rclcpp::get_logger("GuardCondition Example"), "Triggering GuardCondition from external thread");
-  guard_condition->trigger();  // 触发 GuardCondition
-}
+int main(int argc, char * argv[])
+{
+  // FILE *fp = freopen("/home/neu/Desktop/Openmp/results/10.23/1_to_N/OMP_DEFAULT/1_to_4_FIFO.log", "w", stdout);
 
-class MyNode : public rclcpp::Node {
-public:
-  MyNode() : Node("my_node") {
-    // 在构造函数中初始化 GuardCondition
-    guard_condition_ = std::make_shared<rclcpp::GuardCondition>();
+  setvbuf(stdout, NULL, _IONBF, BUFSIZ);
+  dummy_load_calibration();
 
-    // 创建一个线程模拟外部事件
-    external_thread_ = std::thread(external_event_trigger, guard_condition_);
-  }
-
-  // 覆盖自定义的回调函数
-  void handle_guard_condition() {
-    RCLCPP_INFO(this->get_logger(), "Handling GuardCondition event");
-  }
-
-  rclcpp::GuardCondition::SharedPtr get_guard_condition() const {
-    return guard_condition_;
-  }
-
-  ~MyNode() {
-    if (external_thread_.joinable()) {
-      external_thread_.join();
-    }
-  }
-
-private:
-  rclcpp::GuardCondition::SharedPtr guard_condition_;
-  std::thread external_thread_;
-};
-
-int main(int argc, char **argv) {
   rclcpp::init(argc, argv);
 
-  auto node = std::make_shared<MyNode>();
+  rclcpp::executors::MultiThreadedExecutor executor(rclcpp::ExecutorOptions(), EXECUTOR_THREAD_NUM);
 
-  // 创建一个单线程的 Executor
-  rclcpp::executors::SingleThreadedExecutor executor;
+  auto Timer1 = std::make_shared<Sensor>("Timer1", "CHAIN1_TIMER_OUT", 1, 1, 0, 1000ms, false, executor);
+  executor.add_node(Timer1);
+  auto Sub1 = std::make_shared<Command>("Sub1", "CHAIN1_TIMER_OUT", 1, 1, 2000, true, executor);
+  executor.add_node(Sub1);
+  auto Sub2 = std::make_shared<Command>("Sub2", "CHAIN1_TIMER_OUT", 1, 2, 2000, true, executor);
+  executor.add_node(Sub2);
+  // auto Sub3 = std::make_shared<Command>("Sub3", "CHAIN1_TIMER_OUT", 1, 3, 2000, true, executor);
+  // executor.add_node(Sub3);
+  // auto Sub4 = std::make_shared<Command>("Sub4", "CHAIN1_TIMER_OUT", 1, 4, 2000, true, executor);
+  // executor.add_node(Sub4);
 
-  // 注册节点
-  executor.add_node(node);
+  set_strategy(1);
 
-  // 使用 lambda 函数来处理 GuardCondition 的触发，注意这里我们添加了 size_t 参数
-  auto guard_callback = [&](size_t) {
-    node->handle_guard_condition();
-  };
-
-    // 注册回调，当 GuardCondition 被触发时调用
-  node->get_guard_condition()->set_on_trigger_callback(guard_callback);
-
-  // 进入 Executor 的 spin 循环
   executor.spin();
 
+  // fclose(fp);
+
   rclcpp::shutdown();
+
   return 0;
 }
-
-

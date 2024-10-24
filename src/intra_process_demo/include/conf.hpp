@@ -13,9 +13,12 @@
 #define OPENMP2         2
 #define EXECUTE_TYPE    OPENMP1
 
-#define OPENMP_THREAD_NUM      3
-#define EXECUTOR_THREAD_NUM    3
+#define OPENMP_THREAD_NUM      2
+#define EXECUTOR_THREAD_NUM    2
 
 // 开启Timer错过的打印输出
-#define TIMER_MISSED    1
+#define TIMER_MISSED    0
 #define CHAIN_WORKFLOW  0.3
+
+// OMP的段数
+#define OMP_NUM     1
