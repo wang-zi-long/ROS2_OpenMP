@@ -266,14 +266,11 @@ extern void enqueue (void (*) (void *), void*, int, int) __GOMP_NOTHROW;
 extern omp_Node* dequeue (void) __GOMP_NOTHROW;
 extern void dequeue1(omp_Node*) __GOMP_NOTHROW;
 extern omp_Node* dequeue2(int) __GOMP_NOTHROW;
-extern void dequeue3(void) __GOMP_NOTHROW;
 extern void set_strategy(int) __GOMP_NOTHROW;
 extern int get_strategy(void) __GOMP_NOTHROW;
 extern void set_executor_num(int) __GOMP_NOTHROW;
 extern void set_priority(int, long int) __GOMP_NOTHROW;
 extern void set_tid_map(long int, int) __GOMP_NOTHROW;
-extern void set_wait_for_work_flag(bool) __GOMP_NOTHROW;
-extern bool get_wait_for_work_flag(void) __GOMP_NOTHROW;
 
 extern void omp_set_num_threads (int) __GOMP_NOTHROW;
 extern int omp_get_num_threads (void) __GOMP_NOTHROW;

@@ -256,6 +256,7 @@ typedef struct pri_count_node{
   int count;
   struct pri_count_node *next;
 }pri_count_node;
+
 pri_count_node* pri_count;
 pthread_mutex_t pri_count_lock;
 pthread_cond_t wait_cond;
@@ -268,8 +269,8 @@ void pri_count_handle1(int priority){
     pre = pre->next;
   }
   if(pre->next == NULL){
-    // long int Tid = syscall(SYS_gettid);
-    // printf("|TID:%ld|Find pri_count failed!!!\n", Tid);
+    long int Tid = syscall(SYS_gettid);
+    printf("|TID:%ld|Find pri_count failed!!!\n", Tid);
     pthread_mutex_unlock(&pri_count_lock);
     return;
   }
@@ -290,14 +291,6 @@ omp_Node *queue;
 pthread_mutex_t pool_lock;
 omp_Node* node_pool;
 
-bool wait_for_work_flag;
-void set_wait_for_work_flag(bool flag){
-  wait_for_work_flag = flag;
-}
-bool get_wait_for_work_flag(){
-  return wait_for_work_flag;
-}
-
 void
 GOMP_parallel (void (*fn) (void *), void *data, unsigned num_threads,
 	       unsigned int flags)
@@ -308,18 +301,8 @@ GOMP_parallel (void (*fn) (void *), void *data, unsigned num_threads,
     num_threads = gomp_resolve_num_threads (num_threads, 0);
     gomp_team_start (fn, data, num_threads, flags, gomp_new_team (num_threads),
         NULL);
-    long int Tid = syscall(SYS_gettid);
-    uint64_t cur1 = get_clocktime();
-
     fn (data);
-
-    uint64_t cur2 = get_clocktime();
-    printf("|Tid:%ld|-->|%ld|%ld|%ld|\n", Tid, cur1, cur2, cur2 - cur1);
-
     ialias_call (GOMP_parallel_end) ();
-
-    cur2 = get_clocktime();
-    printf("|Tid:%ld|-->|after GOMP_end : %ld|\n", Tid, cur2);
   }else if(strategy == 2){
     if(executor_num == -1){
       printf("Not set executor_num!!!\n");
@@ -331,61 +314,52 @@ GOMP_parallel (void (*fn) (void *), void *data, unsigned num_threads,
     }
     int pri = priority[executor_id];
     enqueue(fn, data, pri, executor_num);
-  }
-}
 
-void dequeue3(){
-  long int Tid = syscall(SYS_gettid);
-  int executor_id = find(Tid);
-  if(executor_id == -1){
-    printf("Find executor_id failed!!!\n");
-  }
-  int pri = priority[executor_id];
-  omp_Node * temp = dequeue2(pri);
-  while (temp != NULL)
-  {
-    temp->fn(temp->data);
+    omp_Node * temp = dequeue2(pri);
+    while (temp != NULL)
     {
-      int priority = temp->priority;
-      
-      pthread_mutex_lock(&pri_count_lock);
-      pri_count_node* pre = pri_count;
-      while (pre->next != NULL && pre->next->priority != priority){
-        pre = pre->next;
-      }
-      if(pre->next == NULL){
-        printf("Find pri_count failed!!!111\n");
-        pthread_mutex_unlock(&pri_count_lock);
-        return;
-      }else{
-        pre->next->count--;
-        if(pre->next->count == 0 && priority != pri){
-          // 在这种情况下，omp主线程充当omp从线程的角色，需要唤醒其他因执行更高优先级回调而陷入堵塞的omp主线程
-          // omp主线程不需要自己唤醒自己
-          pri_count_node* temp = pre->next;
-          pre->next = temp->next;
-          free(temp);
-          pthread_cond_signal(&wait_cond);
+      temp->fn(temp->data);
+      {
+        int priority = temp->priority;
+        
+        pthread_mutex_lock(&pri_count_lock);
+        pri_count_node* pre = pri_count;
+        while (pre->next != NULL && pre->next->priority != priority){
+          pre = pre->next;
         }
-        pthread_mutex_unlock(&pri_count_lock);
-      }
+        if(pre->next == NULL){
+          printf("Find pri_count failed!!!111\n");
+          pthread_mutex_unlock(&pri_count_lock);
+          return;
+        }else{
+          pre->next->count--;
+          if(pre->next->count == 0 && priority != pri){
+            // 在这种情况下，omp主线程充当omp从线程的角色，需要唤醒其他因执行更高优先级回调而陷入堵塞的omp主线程
+            // omp主线程不需要自己唤醒自己
+            pri_count_node* temp = pre->next;
+            pre->next = temp->next;
+            free(temp);
+            pthread_cond_signal(&wait_cond);
+          }
+          pthread_mutex_unlock(&pri_count_lock);
+        }
 
-      pthread_mutex_lock(&pool_lock);
-      if(node_pool->pre == node_pool->next && node_pool->pre == NULL){
-        node_pool->pre = node_pool->next = temp;
-      }else{
-        temp->pre = node_pool;
-        temp->next = node_pool->next;
-        node_pool->next->pre = temp;
-        node_pool->next = temp;
+        pthread_mutex_lock(&pool_lock);
+        if(node_pool->pre == node_pool->next && node_pool->pre == NULL){
+          node_pool->pre = node_pool->next = temp;
+        }else{
+          temp->pre = node_pool;
+          temp->next = node_pool->next;
+          node_pool->next->pre = temp;
+          node_pool->next = temp;
+        }
+        pthread_mutex_unlock(&pool_lock);
       }
-      pthread_mutex_unlock(&pool_lock);
+      temp = dequeue2(pri);
     }
-    temp = dequeue2(pri);
+    pri_count_handle1(pri);
   }
-  pri_count_handle1(pri);
 }
-ialias (dequeue3)
 
 void omp_queue_init(){
   queue = (omp_Node*)malloc(sizeof(omp_Node));
@@ -418,7 +392,6 @@ void omp_queue_init(){
   pri_count = (pri_count_node*)malloc(sizeof(pri_count_node));
   pri_count->next = NULL;
   pthread_cond_init(&wait_cond, NULL);
-  wait_for_work_flag = false;
 }
 ialias (omp_queue_init)
 
@@ -430,6 +403,7 @@ void enqueue(void (*fn) (void *), void *data, int priority, int executor_num) {
   temp->next = pri_count->next;
   pri_count->next = temp;
   pthread_mutex_unlock(&pri_count_lock);
+
   for(int i = 0;i < executor_num;++i){
     pthread_mutex_lock(&pool_lock);
     omp_Node* temp;
@@ -527,7 +501,7 @@ void dequeue1(omp_Node *temp){
     pre = pre->next;
   }
   if(pre->next == NULL){
-    printf("Find pri_count failed!!!\n");
+    printf("Find pri_count failed!!!222\n");
     pthread_mutex_unlock(&pri_count_lock);
     return;
   }else{
