@@ -13,8 +13,8 @@
 #define OPENMP2         2
 #define EXECUTE_TYPE    OPENMP1
 
-#define OPENMP_THREAD_NUM      2
-#define EXECUTOR_THREAD_NUM    2
+#define OPENMP_THREAD_NUM      4
+#define EXECUTOR_THREAD_NUM    4
 
 // 开启Timer错过的打印输出
 #define TIMER_MISSED    0

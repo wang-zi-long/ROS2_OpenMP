@@ -43,6 +43,7 @@
 #include <time.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 using namespace std::chrono_literals;
 
@@ -933,56 +934,68 @@ uint64_t get_clocktime1() {
     return all;  
 }
 
-std::mutex wait_mutex;
-bool
+// pthread_mutex_t mutex;
+int flag = 0;
+pthread_mutexattr_t attr;
+pthread_mutex_t mutex;
+bool 
 Executor::get_next_executable(AnyExecutable & any_executable, std::chrono::nanoseconds timeout)
 {
+  if (flag == 0){
+    pthread_mutexattr_init(&attr);
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_NORMAL);
+    pthread_mutex_init(&mutex, &attr);
+    flag++;
+  }
   // long int tid = syscall(SYS_gettid);
-  // uint64_t cur_time = get_clocktime1();
-  // printf("|Tid:%ld|Before wait_lock:%ld\n", tid, cur_time);
+  // std::unique_lock<std::mutex> wait_lock{wait_mutex};
 
-  std::unique_lock<std::mutex> wait_lock{wait_mutex};
+  // uint64_t cur = get_clocktime1();
+  // printf("|TID:%ld|lock-->|%lu|\n", tid, cur);
 
-  // cur_time = get_clocktime1();
-  // printf("|Tid:%ld|after wait_lock:%ld\n", tid, cur_time);
+  pthread_mutex_lock(&mutex);
+
+  // cur = get_clocktime1();
+  // printf("|TID:%ld|lock111-->|%lu|\n", tid, cur);
 
   bool success = false;
-  // Check to see if there are any subscriptions or timers needing service
-  // TODO(wjwwood): improve run to run efficiency of this function
   success = get_next_ready_executable(any_executable);
-  // If there are none
+
   if (!success) {
 
     if(get_strategy() == 2){
-      // 当wait_set中没有多余的就绪回调时，在更新wait_set之前，应当首先查看omp队列
-      // omp任务等待omp从线程执行的最长时间，应该就是查看一次wait_set的时间
-      // long int tid = syscall(SYS_gettid);
-      // uint64_t cur_time = get_clocktime1();
-      // printf("|TID:%ld|-->|Before      wait_for_work:%lu|\n", tid, cur_time);
-      wait_lock.unlock();
+      // uint64_t cur = get_clocktime1();
+      // printf("|TID:%ld|33333-->|%lu|\n", tid, cur);
+
       omp_Node *temp = dequeue();
       if(temp != NULL){
+        // wait_lock.unlock();
+        pthread_mutex_unlock(&mutex);
         temp->fn(temp->data);
         dequeue1(temp);
         temp = dequeue();
         while(temp != NULL){
+          // cur = get_clocktime1();
+          // printf("|Tid:%ld|-->|&&&&&|%ld\n", tid, cur);
           temp->fn(temp->data);
           dequeue1(temp);
           temp = dequeue();
         }
+        // cur = get_clocktime1();
+        // printf("|Tid:%ld|-->|!!!!!|%ld\n", tid, cur);
+        // wait_lock.lock();
+        pthread_mutex_lock(&mutex);
       }
-      wait_lock.lock();
       set_wait_for_work_flag(true);
+      // cur = get_clocktime1();
+      // printf("|TID:%ld|Wait111-->|%lu|\n", tid, cur);
     }
 
-    // cur_time = get_clocktime1();
-    // printf("|Tid:%ld|Before wait_for_work:%ld\n", tid, cur_time);
-    // Wait for subscriptions or timers to work on
     wait_for_work(timeout);
-    // cur_time = get_clocktime1();
-    // printf("|Tid:%ld|After  wait_for_work:%ld\n", tid, cur_time);
 
     if(get_strategy() == 2){
+      // uint64_t cur = get_clocktime1();
+      // printf("|TID:%ld|Wait222-->|%lu|\n", tid, cur);
       set_wait_for_work_flag(false);
     }
 
@@ -992,14 +1005,10 @@ Executor::get_next_executable(AnyExecutable & any_executable, std::chrono::nanos
     // Try again
     success = get_next_ready_executable(any_executable);
   }
-
-  // cur_time = get_clocktime1();
-  // printf("|Tid:%ld|Before unlock:%ld\n", tid, cur_time);
-
-  wait_lock.unlock();
-
-  // cur_time = get_clocktime1();
-  // printf("|Tid:%ld|After  unlock:%ld\n", tid, cur_time);
+  // wait_lock.unlock();
+  // cur = get_clocktime1();
+  // printf("|TID:%ld|unlock-->|%lu|\n", tid, cur);
+  pthread_mutex_unlock(&mutex);
   return success;
 }
 

@@ -7,10 +7,12 @@ OMP_1.0 {
 	dequeue1;
 	dequeue2;
 	dequeue3;
+	pri_count_handle1;
 	set_strategy;
 	get_strategy;
 	set_executor_num;
 	set_priority;
+	get_priority;
 	set_tid_map;
 	set_wait_for_work_flag;
 	get_wait_for_work_flag;

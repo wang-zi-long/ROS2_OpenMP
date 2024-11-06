@@ -27,7 +27,7 @@
 #include <sys/syscall.h>
 #include <string>
 #include <cstdlib>
-#include "/home/neu/Desktop/Openmp/src/intra_process_demo/include/conf.hpp"
+#include "/home/neu/Desktop/OpenMP/src/intra_process_demo/include/conf.hpp"
 #include "/usr/local/lib/gcc/x86_64-pc-linux-gnu/15.0.0/include/omp.h"
 #include <unistd.h>
 #include <time.h>
@@ -83,7 +83,7 @@ MultiThreadedExecutor::get_number_of_threads()
   return number_of_threads_;
 }
 
-void openmp_init(int this_thread_number){
+void openmp_init(size_t this_thread_number){
   #pragma omp parallel num_threads(OPENMP_THREAD_NUM)
 	{
 		pthread_t current_thread = pthread_self();
@@ -92,9 +92,8 @@ void openmp_init(int this_thread_number){
 		CPU_ZERO(&cpuset);
 		CPU_SET(0, &cpuset);
 		CPU_SET(1, &cpuset);
-    // CPU_SET(2, &cpuset);
-    // CPU_SET(3, &cpuset);
-    // CPU_SET(4, &cpuset);
+    CPU_SET(2, &cpuset);
+    CPU_SET(3, &cpuset);
 		int result = pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
 		if (result != 0) {
 			perror("pthread_setaffinity_np");
@@ -109,7 +108,7 @@ void openmp_init(int this_thread_number){
 		std::string command = "sudo chrt -f -p 50 " + std::to_string(tid);
 		system(command.c_str());
 
-    printf("|%d|%ld|\n", this_thread_number, tid);
+    printf("|%ld|%ld|\n", this_thread_number, tid);
 	}
 }
 
@@ -170,7 +169,6 @@ MultiThreadedExecutor::run(size_t this_thread_number)
     CPU_SET(1, &cpuset);
     CPU_SET(2, &cpuset);
     CPU_SET(3, &cpuset);
-    // CPU_SET(4, &cpuset);
     int result = pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
     if (result != 0) {
       perror("pthread_setaffinity_np");
@@ -182,22 +180,16 @@ MultiThreadedExecutor::run(size_t this_thread_number)
       exit(EXIT_FAILURE);
     }
     long int tid = syscall(SYS_gettid);
-    // std::string command = "sudo chrt -f -p 50 " + std::to_string(tid);
-    // system(command.c_str());
+    std::string command = "sudo chrt -f -p 50 " + std::to_string(tid);
+    system(command.c_str());
     set_tid_map(tid, this_thread_number);
+    printf("|%ld|%ld|\n", this_thread_number, tid);
   }
-
-  long int tid = syscall(SYS_gettid);
-  uint64_t cur_time = 0;
 
   while (rclcpp::ok(this->context_) && spinning.load()) {
     rclcpp::AnyExecutable any_exec;
     {
-      // cur_time = get_clocktime();
-      // printf("|TID:%ld|-->|Before          wait_lock:%lu|\n", tid, cur_time);
       // std::lock_guard wait_lock{wait_mutex_};
-      // cur_time = get_clocktime();
-      // printf("|TID:%ld|-->|After           wait_lock:%lu|\n", tid, cur_time);
       if (!rclcpp::ok(this->context_) || !spinning.load()) {
         return;
       }
@@ -210,12 +202,16 @@ MultiThreadedExecutor::run(size_t this_thread_number)
     }
 
     if(strategy == 2){
+      // long int tid = syscall(SYS_gettid);
+      // uint64_t cur = get_clocktime();
+      // printf("|TID:%ld|22222-->|%lu|\n", tid, cur);
+
       omp_Node *temp = dequeue();
       // 执行器线程进入omp从线程状态后，从omp队列中出队的任务节点的优先级，不可能比将要执行的就绪回调的优先级更低
       while(temp != NULL){
+        // cur = get_clocktime();
+        // printf("|Tid:%ld|-->|*****|%ld\n", tid, cur);
         temp->fn(temp->data);
-        // cur_time = get_clocktime();
-        // printf("|TID:%ld|-->|Before    execute_any_exe:%lu|\n", tid, cur_time);
         dequeue1(temp);
         temp = dequeue();
       }
@@ -224,9 +220,6 @@ MultiThreadedExecutor::run(size_t this_thread_number)
       set_priority(this_thread_number, value);
     }
 
-    // cur_time = get_clocktime();
-    // printf("|Tid:%ld|execute_any_executable:%ld\n", tid, cur_time);
-    // 就绪回调的执行可能用到omp，因此传入一个
     execute_any_executable(any_exec);
 
     // Clear the callback_group to prevent the AnyExecutable destructor from

@@ -305,21 +305,19 @@ GOMP_parallel (void (*fn) (void *), void *data, unsigned num_threads,
   if(strategy == -1){
     printf("Not set OMP_strategy!!!\n");
   }else if(strategy == 1){
+
+    // uint64_t cur1 = get_clocktime();
+
     num_threads = gomp_resolve_num_threads (num_threads, 0);
     gomp_team_start (fn, data, num_threads, flags, gomp_new_team (num_threads),
         NULL);
-    long int Tid = syscall(SYS_gettid);
-    uint64_t cur1 = get_clocktime();
+
+    // uint64_t cur2 = get_clocktime();
+    // printf("|%d|%ld\n", getcpu_via_syscall(), cur2 - cur1);
 
     fn (data);
 
-    uint64_t cur2 = get_clocktime();
-    printf("|Tid:%ld|-->|%ld|%ld|%ld|\n", Tid, cur1, cur2, cur2 - cur1);
-
     ialias_call (GOMP_parallel_end) ();
-
-    cur2 = get_clocktime();
-    printf("|Tid:%ld|-->|after GOMP_end : %ld|\n", Tid, cur2);
   }else if(strategy == 2){
     if(executor_num == -1){
       printf("Not set executor_num!!!\n");
@@ -334,56 +332,48 @@ GOMP_parallel (void (*fn) (void *), void *data, unsigned num_threads,
   }
 }
 
-void dequeue3(){
+int get_priority(){
   long int Tid = syscall(SYS_gettid);
   int executor_id = find(Tid);
   if(executor_id == -1){
     printf("Find executor_id failed!!!\n");
   }
-  int pri = priority[executor_id];
-  omp_Node * temp = dequeue2(pri);
-  while (temp != NULL)
-  {
-    temp->fn(temp->data);
-    {
-      int priority = temp->priority;
-      
-      pthread_mutex_lock(&pri_count_lock);
-      pri_count_node* pre = pri_count;
-      while (pre->next != NULL && pre->next->priority != priority){
-        pre = pre->next;
-      }
-      if(pre->next == NULL){
-        printf("Find pri_count failed!!!111\n");
-        pthread_mutex_unlock(&pri_count_lock);
-        return;
-      }else{
-        pre->next->count--;
-        if(pre->next->count == 0 && priority != pri){
-          // 在这种情况下，omp主线程充当omp从线程的角色，需要唤醒其他因执行更高优先级回调而陷入堵塞的omp主线程
-          // omp主线程不需要自己唤醒自己
-          pri_count_node* temp = pre->next;
-          pre->next = temp->next;
-          free(temp);
-          pthread_cond_signal(&wait_cond);
-        }
-        pthread_mutex_unlock(&pri_count_lock);
-      }
+  return priority[executor_id];
+}
 
-      pthread_mutex_lock(&pool_lock);
-      if(node_pool->pre == node_pool->next && node_pool->pre == NULL){
-        node_pool->pre = node_pool->next = temp;
-      }else{
-        temp->pre = node_pool;
-        temp->next = node_pool->next;
-        node_pool->next->pre = temp;
-        node_pool->next = temp;
-      }
-      pthread_mutex_unlock(&pool_lock);
+void dequeue3(omp_Node *temp, int pri){
+    int priority = temp->priority;
+    pthread_mutex_lock(&pri_count_lock);
+    pri_count_node* pre = pri_count;
+    while (pre->next != NULL && pre->next->priority != priority){
+      pre = pre->next;
     }
-    temp = dequeue2(pri);
-  }
-  pri_count_handle1(pri);
+    if(pre->next == NULL){
+      printf("Find pri_count failed!!!111\n");
+      pthread_mutex_unlock(&pri_count_lock);
+      return;
+    }else{
+      pre->next->count--;
+      if(pre->next->count == 0 && priority != pri){
+        // 在这种情况下，omp主线程充当omp从线程的角色，需要唤醒其他因执行更高优先级回调而陷入堵塞的omp主线程
+        // omp主线程不需要自己唤醒自己
+        pri_count_node* temp = pre->next;
+        pre->next = temp->next;
+        free(temp);
+        pthread_cond_signal(&wait_cond);
+      }
+      pthread_mutex_unlock(&pri_count_lock);
+    }
+    pthread_mutex_lock(&pool_lock);
+    if(node_pool->pre == node_pool->next && node_pool->pre == NULL){
+      node_pool->pre = node_pool->next = temp;
+    }else{
+      temp->pre = node_pool;
+      temp->next = node_pool->next;
+      node_pool->next->pre = temp;
+      node_pool->next = temp;
+    }
+    pthread_mutex_unlock(&pool_lock);  
 }
 ialias (dequeue3)
 

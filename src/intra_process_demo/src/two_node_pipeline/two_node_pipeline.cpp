@@ -35,18 +35,33 @@ int main(int argc, char * argv[])
 
   rclcpp::executors::MultiThreadedExecutor executor(rclcpp::ExecutorOptions(), EXECUTOR_THREAD_NUM);
 
-  auto Timer1 = std::make_shared<Sensor>("Timer1", "CHAIN1_TIMER_OUT", 1, 1, 0, 1000ms, false, executor);
+  auto Timer1 = std::make_shared<Sensor>("Timer1", "CHAIN1_TIMER_OUT", 1, 1, 0, 100ms, false, executor);
   executor.add_node(Timer1);
-  auto Sub1 = std::make_shared<Command>("Sub1", "CHAIN1_TIMER_OUT", 1, 1, 2000, true, executor);
+  auto Sub1 = std::make_shared<Command>("Sub1", "CHAIN1_TIMER_OUT", 1, 1, 320, true, executor);
   executor.add_node(Sub1);
-  auto Sub2 = std::make_shared<Command>("Sub2", "CHAIN1_TIMER_OUT", 1, 2, 2000, true, executor);
+  auto Sub2 = std::make_shared<Command>("Sub2", "CHAIN1_TIMER_OUT", 1, 2, 320, false, executor);
   executor.add_node(Sub2);
-  // auto Sub3 = std::make_shared<Command>("Sub3", "CHAIN1_TIMER_OUT", 1, 3, 2000, true, executor);
-  // executor.add_node(Sub3);
-  // auto Sub4 = std::make_shared<Command>("Sub4", "CHAIN1_TIMER_OUT", 1, 4, 2000, true, executor);
-  // executor.add_node(Sub4);
+  auto Sub3 = std::make_shared<Command>("Sub3", "CHAIN1_TIMER_OUT", 1, 3, 320, false, executor);
+  executor.add_node(Sub3);
+  auto Sub4 = std::make_shared<Command>("Sub4", "CHAIN1_TIMER_OUT", 1, 4, 320, false, executor);
+  executor.add_node(Sub4);
+  auto Sub5 = std::make_shared<Command>("Sub5", "CHAIN1_TIMER_OUT", 1, 5, 320, false, executor);
+  executor.add_node(Sub5);
+  auto Sub6 = std::make_shared<Command>("Sub6", "CHAIN1_TIMER_OUT", 1, 6, 320, false, executor);
+  executor.add_node(Sub6);
+  auto Sub7 = std::make_shared<Command>("Sub7", "CHAIN1_TIMER_OUT", 1, 7, 320, false, executor);
+  executor.add_node(Sub7);
+  auto Sub8 = std::make_shared<Command>("Sub8", "CHAIN1_TIMER_OUT", 1, 8, 320, false, executor);
+  executor.add_node(Sub8);
+  auto Sub9 = std::make_shared<Command>("Sub9", "CHAIN1_TIMER_OUT", 1, 9, 320, false, executor);
+  executor.add_node(Sub9);
+  auto Sub10 = std::make_shared<Command>("Sub10", "CHAIN1_TIMER_OUT", 1, 10, 320, false, executor);
+  executor.add_node(Sub10);
 
-  set_strategy(1);
+  set_executor_num(EXECUTOR_THREAD_NUM);
+  set_strategy(2);
+  omp_queue_init();
+  // set_strategy(1);
 
   executor.spin();
 
