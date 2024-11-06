@@ -1,0 +1,607 @@
+Linux 5.10.216-tegra (neu-desktop) 	11/05/2024 	_aarch64_	(12 CPU)
+
+06:43:08 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:09 PM  1000     28523     15.00      0.00  two_node_pipeli
+06:43:09 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:43:09 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:43:09 PM  1000     28512     15.00      0.00  two_node_pipeli
+
+06:43:09 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:10 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:43:10 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:43:10 PM  1000     28524     15.00      0.00  two_node_pipeli
+06:43:10 PM  1000     28512     17.00      0.00  two_node_pipeli
+
+06:43:10 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:11 PM  1000     28523     14.00      0.00  two_node_pipeli
+06:43:11 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:43:11 PM  1000     28524     15.00      0.00  two_node_pipeli
+06:43:11 PM  1000     28512     15.00      0.00  two_node_pipeli
+
+06:43:11 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:12 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:43:12 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:43:12 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:43:12 PM  1000     28512     17.00      0.00  two_node_pipeli
+
+06:43:12 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:13 PM  1000     28523     19.00      0.00  two_node_pipeli
+06:43:13 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:43:13 PM  1000     28524     19.00      0.00  two_node_pipeli
+06:43:13 PM  1000     28512     17.00      0.00  two_node_pipeli
+
+06:43:13 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:14 PM  1000     28523     15.00      0.00  two_node_pipeli
+06:43:14 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:43:14 PM  1000     28524     15.00      0.00  two_node_pipeli
+06:43:14 PM  1000     28512     15.00      0.00  two_node_pipeli
+
+06:43:14 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:15 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:43:15 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:43:15 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:43:15 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:43:15 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:16 PM  1000     28523     14.00      0.00  two_node_pipeli
+06:43:16 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:43:16 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:43:16 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:43:16 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:17 PM  1000     28523     18.00      0.00  two_node_pipeli
+06:43:17 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:43:17 PM  1000     28524     15.00      0.00  two_node_pipeli
+06:43:17 PM  1000     28512     15.00      0.00  two_node_pipeli
+
+06:43:17 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:18 PM  1000     28523     15.00      0.00  two_node_pipeli
+06:43:18 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:43:18 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:43:18 PM  1000     28512     17.00      0.00  two_node_pipeli
+
+06:43:18 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:19 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:43:19 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:43:19 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:43:19 PM  1000     28512     15.00      0.00  two_node_pipeli
+
+06:43:19 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:20 PM  1000     28523     18.00      0.00  two_node_pipeli
+06:43:20 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:43:20 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:43:20 PM  1000     28512     17.00      0.00  two_node_pipeli
+
+06:43:20 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:21 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:43:21 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:43:21 PM  1000     28524     15.00      0.00  two_node_pipeli
+06:43:21 PM  1000     28512     15.00      0.00  two_node_pipeli
+
+06:43:21 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:22 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:43:22 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:43:22 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:43:22 PM  1000     28512     13.00      0.00  two_node_pipeli
+
+06:43:22 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:23 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:43:23 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:43:23 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:43:23 PM  1000     28512     17.00      0.00  two_node_pipeli
+
+06:43:23 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:24 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:43:24 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:43:24 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:43:24 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:43:24 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:25 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:43:25 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:43:25 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:43:25 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:43:25 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:26 PM  1000     28523     15.00      0.00  two_node_pipeli
+06:43:26 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:43:26 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:43:26 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:43:26 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:27 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:43:27 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:43:27 PM  1000     28524     14.00      0.00  two_node_pipeli
+06:43:27 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:43:27 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:28 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:43:28 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:43:28 PM  1000     28524     18.00      0.00  two_node_pipeli
+06:43:28 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:43:28 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:29 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:43:29 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:43:29 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:43:29 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:43:29 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:30 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:43:30 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:43:30 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:43:30 PM  1000     28512     17.00      0.00  two_node_pipeli
+
+06:43:30 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:31 PM  1000     28523     15.00      0.00  two_node_pipeli
+06:43:31 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:43:31 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:43:31 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:43:31 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:32 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:43:32 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:43:32 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:43:32 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:43:32 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:33 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:43:33 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:43:33 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:43:33 PM  1000     28512     15.00      0.00  two_node_pipeli
+
+06:43:33 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:34 PM  1000     28523     18.00      0.00  two_node_pipeli
+06:43:34 PM  1000     28522     18.00      0.00  two_node_pipeli
+06:43:34 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:43:34 PM  1000     28512     19.00      0.00  two_node_pipeli
+
+06:43:34 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:35 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:43:35 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:43:35 PM  1000     28524     15.00      0.00  two_node_pipeli
+06:43:35 PM  1000     28512     15.00      0.00  two_node_pipeli
+
+06:43:35 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:36 PM  1000     28523     15.00      0.00  two_node_pipeli
+06:43:36 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:43:36 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:43:36 PM  1000     28512     17.00      0.00  two_node_pipeli
+
+06:43:36 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:37 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:43:37 PM  1000     28522     14.00      0.00  two_node_pipeli
+06:43:37 PM  1000     28524     15.00      0.00  two_node_pipeli
+06:43:37 PM  1000     28512     17.00      0.00  two_node_pipeli
+
+06:43:37 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:38 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:43:38 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:43:38 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:43:38 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:43:38 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:39 PM  1000     28523     15.00      0.00  two_node_pipeli
+06:43:39 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:43:39 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:43:39 PM  1000     28512     18.00      0.00  two_node_pipeli
+
+06:43:39 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:40 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:43:40 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:43:40 PM  1000     28524     15.00      0.00  two_node_pipeli
+06:43:40 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:43:40 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:41 PM  1000     28523     15.00      0.00  two_node_pipeli
+06:43:41 PM  1000     28522     18.00      0.00  two_node_pipeli
+06:43:41 PM  1000     28524     18.00      0.00  two_node_pipeli
+06:43:41 PM  1000     28512     18.00      0.00  two_node_pipeli
+
+06:43:41 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:42 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:43:42 PM  1000     28522     14.00      0.00  two_node_pipeli
+06:43:42 PM  1000     28524     14.00      0.00  two_node_pipeli
+06:43:42 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:43:42 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:43 PM  1000     28523     15.00      0.00  two_node_pipeli
+06:43:43 PM  1000     28522     14.00      0.00  two_node_pipeli
+06:43:43 PM  1000     28524     15.00      0.00  two_node_pipeli
+06:43:43 PM  1000     28512     13.00      0.00  two_node_pipeli
+
+06:43:43 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:44 PM  1000     28523     15.00      0.00  two_node_pipeli
+06:43:44 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:43:44 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:43:44 PM  1000     28512     17.00      0.00  two_node_pipeli
+
+06:43:44 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:45 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:43:45 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:43:45 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:43:45 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:43:45 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:46 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:43:46 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:43:46 PM  1000     28524     15.00      0.00  two_node_pipeli
+06:43:46 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:43:46 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:47 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:43:47 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:43:47 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:43:47 PM  1000     28512     15.00      0.00  two_node_pipeli
+
+06:43:47 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:48 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:43:48 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:43:48 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:43:48 PM  1000     28512     18.00      0.00  two_node_pipeli
+
+06:43:48 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:49 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:43:49 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:43:49 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:43:49 PM  1000     28512     15.00      0.00  two_node_pipeli
+
+06:43:49 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:50 PM  1000     28523     15.00      0.00  two_node_pipeli
+06:43:50 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:43:50 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:43:50 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:43:50 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:51 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:43:51 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:43:51 PM  1000     28524     15.00      0.00  two_node_pipeli
+06:43:51 PM  1000     28512     15.00      0.00  two_node_pipeli
+
+06:43:51 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:52 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:43:52 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:43:52 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:43:52 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:43:52 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:53 PM  1000     28523     15.00      0.00  two_node_pipeli
+06:43:53 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:43:53 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:43:53 PM  1000     28512     14.00      0.00  two_node_pipeli
+
+06:43:53 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:54 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:43:54 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:43:54 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:43:54 PM  1000     28512     17.00      0.00  two_node_pipeli
+
+06:43:54 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:55 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:43:55 PM  1000     28522     19.00      0.00  two_node_pipeli
+06:43:55 PM  1000     28524     19.00      0.00  two_node_pipeli
+06:43:55 PM  1000     28512     18.00      0.00  two_node_pipeli
+
+06:43:55 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:56 PM  1000     28523     15.00      0.00  two_node_pipeli
+06:43:56 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:43:56 PM  1000     28524     15.00      0.00  two_node_pipeli
+06:43:56 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:43:56 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:57 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:43:57 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:43:57 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:43:57 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:43:57 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:58 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:43:58 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:43:58 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:43:58 PM  1000     28512     19.00      0.00  two_node_pipeli
+
+06:43:58 PM   UID       PID   cswch/s nvcswch/s  Command
+06:43:59 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:43:59 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:43:59 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:43:59 PM  1000     28512     15.00      0.00  two_node_pipeli
+
+06:43:59 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:00 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:44:00 PM  1000     28522     18.00      0.00  two_node_pipeli
+06:44:00 PM  1000     28524     20.00      0.00  two_node_pipeli
+06:44:00 PM  1000     28512     18.00      0.00  two_node_pipeli
+
+06:44:00 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:01 PM  1000     28523     18.00      0.00  two_node_pipeli
+06:44:01 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:44:01 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:44:01 PM  1000     28512     17.00      0.00  two_node_pipeli
+
+06:44:01 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:02 PM  1000     28523     15.00      0.00  two_node_pipeli
+06:44:02 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:44:02 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:44:02 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:02 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:03 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:44:03 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:44:03 PM  1000     28524     18.00      0.00  two_node_pipeli
+06:44:03 PM  1000     28512     18.00      0.00  two_node_pipeli
+
+06:44:03 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:04 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:44:04 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:44:04 PM  1000     28524     15.00      0.00  two_node_pipeli
+06:44:04 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:04 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:05 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:44:05 PM  1000     28522     18.00      0.00  two_node_pipeli
+06:44:05 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:44:05 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:05 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:06 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:44:06 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:44:06 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:44:06 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:06 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:07 PM  1000     28523     14.00      0.00  two_node_pipeli
+06:44:07 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:44:07 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:44:07 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:07 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:08 PM  1000     28523     18.00      0.00  two_node_pipeli
+06:44:08 PM  1000     28522     18.00      0.00  two_node_pipeli
+06:44:08 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:44:08 PM  1000     28512     15.00      0.00  two_node_pipeli
+
+06:44:08 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:09 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:44:09 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:44:09 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:44:09 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:09 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:10 PM  1000     28523     18.00      0.00  two_node_pipeli
+06:44:10 PM  1000     28522     18.00      0.00  two_node_pipeli
+06:44:10 PM  1000     28524     18.00      0.00  two_node_pipeli
+06:44:10 PM  1000     28512     19.00      0.00  two_node_pipeli
+
+06:44:10 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:11 PM  1000     28523     15.00      0.00  two_node_pipeli
+06:44:11 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:44:11 PM  1000     28524     18.00      0.00  two_node_pipeli
+06:44:11 PM  1000     28512     18.00      0.00  two_node_pipeli
+
+06:44:11 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:12 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:44:12 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:44:12 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:44:12 PM  1000     28512     15.00      0.00  two_node_pipeli
+
+06:44:12 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:13 PM  1000     28523     16.83      0.00  two_node_pipeli
+06:44:13 PM  1000     28522     15.84      0.00  two_node_pipeli
+06:44:13 PM  1000     28524     15.84      0.00  two_node_pipeli
+06:44:13 PM  1000     28512     15.84      0.00  two_node_pipeli
+
+06:44:13 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:14 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:44:14 PM  1000     28522     14.00      0.00  two_node_pipeli
+06:44:14 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:44:14 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:14 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:15 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:44:15 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:44:15 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:44:15 PM  1000     28512     17.00      0.00  two_node_pipeli
+
+06:44:15 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:16 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:44:16 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:44:16 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:44:16 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:16 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:17 PM  1000     28523     15.00      0.00  two_node_pipeli
+06:44:17 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:44:17 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:44:17 PM  1000     28512     17.00      0.00  two_node_pipeli
+
+06:44:17 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:18 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:44:18 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:44:18 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:44:18 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:18 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:19 PM  1000     28523     19.00      0.00  two_node_pipeli
+06:44:19 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:44:19 PM  1000     28524     18.00      0.00  two_node_pipeli
+06:44:19 PM  1000     28512     18.00      0.00  two_node_pipeli
+
+06:44:19 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:20 PM  1000     28523     15.00      0.00  two_node_pipeli
+06:44:20 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:44:20 PM  1000     28524     14.00      0.00  two_node_pipeli
+06:44:20 PM  1000     28512     17.00      0.00  two_node_pipeli
+
+06:44:20 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:21 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:44:21 PM  1000     28522     14.00      0.00  two_node_pipeli
+06:44:21 PM  1000     28524     15.00      0.00  two_node_pipeli
+06:44:21 PM  1000     28512     15.00      0.00  two_node_pipeli
+
+06:44:21 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:22 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:44:22 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:44:22 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:44:22 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:22 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:23 PM  1000     28523     19.00      0.00  two_node_pipeli
+06:44:23 PM  1000     28522     18.00      0.00  two_node_pipeli
+06:44:23 PM  1000     28524     20.00      0.00  two_node_pipeli
+06:44:23 PM  1000     28512     19.00      0.00  two_node_pipeli
+
+06:44:23 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:24 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:44:24 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:44:24 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:44:24 PM  1000     28512     17.00      0.00  two_node_pipeli
+
+06:44:24 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:25 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:44:25 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:44:25 PM  1000     28524     14.00      0.00  two_node_pipeli
+06:44:25 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:25 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:26 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:44:26 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:44:26 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:44:26 PM  1000     28512     18.00      0.00  two_node_pipeli
+
+06:44:26 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:27 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:44:27 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:44:27 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:44:27 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:27 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:28 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:44:28 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:44:28 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:44:28 PM  1000     28512     17.00      0.00  two_node_pipeli
+
+06:44:28 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:29 PM  1000     28523     15.00      0.00  two_node_pipeli
+06:44:29 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:44:29 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:44:29 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:29 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:30 PM  1000     28523     15.00      0.00  two_node_pipeli
+06:44:30 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:44:30 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:44:30 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:30 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:31 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:44:31 PM  1000     28522     14.00      0.00  two_node_pipeli
+06:44:31 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:44:31 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:31 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:32 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:44:32 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:44:32 PM  1000     28524     15.00      0.00  two_node_pipeli
+06:44:32 PM  1000     28512     14.00      0.00  two_node_pipeli
+
+06:44:32 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:33 PM  1000     28523     14.00      0.00  two_node_pipeli
+06:44:33 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:44:33 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:44:33 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:33 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:34 PM  1000     28523     17.00      0.00  two_node_pipeli
+06:44:34 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:44:34 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:44:34 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:34 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:35 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:44:35 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:44:35 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:44:35 PM  1000     28512     15.00      0.00  two_node_pipeli
+
+06:44:35 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:36 PM  1000     28523     14.00      0.00  two_node_pipeli
+06:44:36 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:44:36 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:44:36 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:36 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:37 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:44:37 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:44:37 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:44:37 PM  1000     28512     17.00      0.00  two_node_pipeli
+
+06:44:37 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:38 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:44:38 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:44:38 PM  1000     28524     14.00      0.00  two_node_pipeli
+06:44:38 PM  1000     28512     15.00      0.00  two_node_pipeli
+
+06:44:38 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:39 PM  1000     28523     18.00      0.00  two_node_pipeli
+06:44:39 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:44:39 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:44:39 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:39 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:40 PM  1000     28523     15.00      0.00  two_node_pipeli
+06:44:40 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:44:40 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:44:40 PM  1000     28512     17.00      0.00  two_node_pipeli
+
+06:44:40 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:41 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:44:41 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:44:41 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:44:41 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:41 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:42 PM  1000     28523     18.00      0.00  two_node_pipeli
+06:44:42 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:44:42 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:44:42 PM  1000     28512     18.00      0.00  two_node_pipeli
+
+06:44:42 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:43 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:44:43 PM  1000     28522     17.00      0.00  two_node_pipeli
+06:44:43 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:44:43 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:43 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:44 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:44:44 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:44:44 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:44:44 PM  1000     28512     17.00      0.00  two_node_pipeli
+
+06:44:44 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:45 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:44:45 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:44:45 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:44:45 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:45 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:46 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:44:46 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:44:46 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:44:46 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+06:44:46 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:47 PM  1000     28523     16.00      0.00  two_node_pipeli
+06:44:47 PM  1000     28522     16.00      0.00  two_node_pipeli
+06:44:47 PM  1000     28524     16.00      0.00  two_node_pipeli
+06:44:47 PM  1000     28512     14.00      0.00  two_node_pipeli
+
+06:44:47 PM   UID       PID   cswch/s nvcswch/s  Command
+06:44:48 PM  1000     28523     15.00      0.00  two_node_pipeli
+06:44:48 PM  1000     28522     15.00      0.00  two_node_pipeli
+06:44:48 PM  1000     28524     17.00      0.00  two_node_pipeli
+06:44:48 PM  1000     28512     16.00      0.00  two_node_pipeli
+
+Average:      UID       PID   cswch/s nvcswch/s  Command
+Average:     1000     28523     16.18      0.00  two_node_pipeli
+Average:     1000     28522     16.05      0.00  two_node_pipeli
+Average:     1000     28524     16.27      0.00  two_node_pipeli
+Average:     1000     28512     16.23      0.00  two_node_pipeli
