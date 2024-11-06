@@ -34,7 +34,7 @@ while i < 11 :
     with open(deafult, 'r', encoding='utf-8') as f:
         content = f.readlines()
     idx_c1Start     = [x for x in range(len(content)) if (chain1_end) in content[x]]
-    idx_c1Start     = idx_c1Start[500:-500]
+    idx_c1Start     = idx_c1Start[10:-10]
     num_len = len(idx_c1Start)
     for j in range(0,num_len):
         str_line = content[idx_c1Start[j]]
@@ -66,7 +66,7 @@ with open('/home/neu/Results/TXT/Callback_num.log', 'w') as file:
 colors      = [(220/255.,237/255.,204/255.), (120/255.,214/255.,201/255.)]
 # plt.figure(figsize=(30,20))
 labels = ['GOMP', 'ROSOMP']
-is_showflier = True
+is_showflier = False
 # bplot_0     = plt.boxplot(chain0, patch_artist=True,labels=labels, showfliers=is_showflier, medianprops={'color':'black', 'linewidth':'1.2'}, positions=(0, 0.25),widths=0.2)
 # for patch, color in zip(bplot_0['boxes'], colors):
 #                 patch.set_facecolor(color)
