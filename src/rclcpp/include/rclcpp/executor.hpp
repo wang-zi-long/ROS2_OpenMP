@@ -200,10 +200,6 @@ public:
   virtual void
   add_node(rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_ptr, bool notify = true);
 
-  RCLCPP_PUBLIC
-  virtual void
-  trigger_interrupt_guard();
-
   /// Convenience function which takes Node and forwards NodeBaseInterface.
   /**
    * \see rclcpp::Executor::add_node
@@ -211,6 +207,10 @@ public:
   RCLCPP_PUBLIC
   virtual void
   add_node(std::shared_ptr<rclcpp::Node> node_ptr, bool notify = true);
+
+  RCLCPP_PUBLIC
+  virtual void
+  trigger_interrupt_guard();
 
   /// Remove a node from the executor.
   /**

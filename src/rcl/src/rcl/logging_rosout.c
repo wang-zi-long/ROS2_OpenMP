@@ -179,6 +179,7 @@ rcl_ret_t rcl_logging_rosout_init_publisher_for_node(
   RCL_CHECK_FOR_NULL_WITH_MSG(node_options, "Node options was null.", return RCL_RET_ERROR);
 
   options.qos = node_options->rosout_qos;
+  options.allocator = node_options->allocator;
   new_entry.publisher = rcl_get_zero_initialized_publisher();
   status =
     rcl_publisher_init(&new_entry.publisher, node, type_support, ROSOUT_TOPIC_NAME, &options);
@@ -253,12 +254,7 @@ void rcl_logging_rosout_output_handler(
       .allocator = __rosout_allocator
     };
 
-    va_list args_clone;
-    // The args are initialized, but clang-tidy cannot tell.
-    // It may be related to this bug: https://bugs.llvm.org/show_bug.cgi?id=41311
-    va_copy(args_clone, *args);  // NOLINT(clang-analyzer-valist.Uninitialized)
-    RCL_RET_FROM_RCUTIL_RET(status, rcutils_char_array_vsprintf(&msg_array, format, args_clone));
-    va_end(args_clone);
+    RCL_RET_FROM_RCUTIL_RET(status, rcutils_char_array_vsprintf(&msg_array, format, *args));
     if (RCL_RET_OK != status) {
       RCUTILS_SAFE_FWRITE_TO_STDERR("Failed to format log string: ");
       RCUTILS_SAFE_FWRITE_TO_STDERR(rcl_get_error_string().str);

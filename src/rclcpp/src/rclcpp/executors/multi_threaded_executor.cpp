@@ -18,22 +18,10 @@
 #include <functional>
 #include <memory>
 #include <vector>
-
 #include "rcpputils/scope_exit.hpp"
-
 #include "rclcpp/utilities.hpp"
-
-#include <unistd.h>
-#include <sys/syscall.h>
-#include <string>
-#include <cstdlib>
-#include "/home/neu/Desktop/OpenMP/src/intra_process_demo/include/conf.hpp"
-#include "/usr/local/lib/gcc/x86_64-pc-linux-gnu/15.0.0/include/omp.h"
-#include <unistd.h>
-#include <time.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <atomic>
+#include "/home/neu/Desktop/OMP/src/intra_process_demo/include/conf.hpp"
+#include "/usr/local/gcc/lib/gcc/aarch64-unknown-linux-gnu/15.0.0/include/omp.h"
 
 using rclcpp::executors::MultiThreadedExecutor;
 
@@ -90,10 +78,14 @@ void openmp_init(size_t this_thread_number){
   
 		cpu_set_t cpuset;
 		CPU_ZERO(&cpuset);
-		CPU_SET(0, &cpuset);
-		CPU_SET(1, &cpuset);
-    CPU_SET(2, &cpuset);
-    CPU_SET(3, &cpuset);
+		CPU_SET(4, &cpuset);
+    CPU_SET(5, &cpuset);
+    CPU_SET(6, &cpuset);
+    CPU_SET(7, &cpuset);
+    // CPU_SET(8, &cpuset);
+    // CPU_SET(9, &cpuset);
+    // CPU_SET(10, &cpuset);
+    // CPU_SET(11, &cpuset);
 		int result = pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
 		if (result != 0) {
 			perror("pthread_setaffinity_np");
@@ -112,63 +104,31 @@ void openmp_init(size_t this_thread_number){
 	}
 }
 
-uint64_t get_clocktime() { 
-    long int        ns; 
-    uint64_t        all; 
-    time_t          sec; 
-    struct timespec spec; 
-
-    clock_gettime(CLOCK_REALTIME, &spec);
-
-    sec   = spec.tv_sec; 
-    ns    = spec.tv_nsec; 
-    all   = (uint64_t) sec * 1000000000UL + (uint64_t) ns; 
-    return all;  
-}
-
 std::atomic<uint64_t> priority(0);
-
 void
 MultiThreadedExecutor::run(size_t this_thread_number)
 {
   (void)this_thread_number;
-
+  
   int strategy = get_strategy();
-  if(strategy == 0){
-    pthread_t current_thread = pthread_self();
-    cpu_set_t cpuset;
-    CPU_ZERO(&cpuset);
-    // @Noted：暂时为每个执行器线程绑定单独的CPU核心
-    // CPU_SET(this_thread_number, &cpuset);
-    CPU_SET(0, &cpuset);
-    CPU_SET(1, &cpuset);
-    CPU_SET(2, &cpuset);
-    CPU_SET(3, &cpuset);
-    // CPU_SET(4, &cpuset);
-    int result = pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
-    if (result != 0) {
-      perror("pthread_setaffinity_np");
-      exit(EXIT_FAILURE);
-    }
-    CPU_ZERO(&cpuset);
-    if (pthread_getaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset) != 0) {
-      perror("pthread_getaffinity_np");
-      exit(EXIT_FAILURE);
-    }
-    long int tid = syscall(SYS_gettid);
-    std::string command = "sudo chrt -f -p 50 " + std::to_string(tid);
-    system(command.c_str());
-  }else if(strategy == 1){
+  
+  if(strategy == 1){
+    // GOMP
     openmp_init(this_thread_number);
   }else if(strategy == 2){
+    // ROSOMP
     pthread_t current_thread = pthread_self();
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
     // @Noted：暂时为每个执行器线程绑定单独的CPU核心
-    CPU_SET(0, &cpuset);
-    CPU_SET(1, &cpuset);
-    CPU_SET(2, &cpuset);
-    CPU_SET(3, &cpuset);
+    CPU_SET(4, &cpuset);
+    CPU_SET(5, &cpuset);
+    CPU_SET(6, &cpuset);
+    CPU_SET(7, &cpuset);
+    // CPU_SET(8, &cpuset);
+    // CPU_SET(9, &cpuset);
+    // CPU_SET(10, &cpuset);
+    // CPU_SET(11, &cpuset);
     int result = pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
     if (result != 0) {
       perror("pthread_setaffinity_np");
@@ -202,15 +162,8 @@ MultiThreadedExecutor::run(size_t this_thread_number)
     }
 
     if(strategy == 2){
-      // long int tid = syscall(SYS_gettid);
-      // uint64_t cur = get_clocktime();
-      // printf("|TID:%ld|22222-->|%lu|\n", tid, cur);
-
       omp_Node *temp = dequeue();
-      // 执行器线程进入omp从线程状态后，从omp队列中出队的任务节点的优先级，不可能比将要执行的就绪回调的优先级更低
       while(temp != NULL){
-        // cur = get_clocktime();
-        // printf("|Tid:%ld|-->|*****|%ld\n", tid, cur);
         temp->fn(temp->data);
         dequeue1(temp);
         temp = dequeue();

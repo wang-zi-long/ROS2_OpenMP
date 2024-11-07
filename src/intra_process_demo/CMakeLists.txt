@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-set(OpenMP_gomp_LIBRARY "/usr/local/lib64/libgomp.so")
+set(OpenMP_gomp_LIBRARY "/usr/local/gcc/lib64/libgomp.so")
 
 project(intra_process_demo)
 
@@ -10,7 +10,7 @@ if(NOT CMAKE_CXX_STANDARD)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic -fopenmp)
+  add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
 find_package(ament_cmake REQUIRED)
@@ -44,7 +44,7 @@ if(OPENMP_FOUND)
   target_link_libraries(two_node_pipeline 
     ${OpenMP_CXX_LIBRARIES})
 endif() 
-  
+
 install(TARGETS
   two_node_pipeline
   DESTINATION lib/${PROJECT_NAME})

@@ -1,4 +1,3 @@
-
 #include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -21,4 +20,4 @@
 #define CHAIN_WORKFLOW  0.3
 
 // OMP的段数
-#define OMP_NUM     1
+#define OMP_NUM     6 // 1,2,3,4,5,6,7,8

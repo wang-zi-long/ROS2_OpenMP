@@ -2,6 +2,38 @@
 Changelog for package rcl
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
+5.3.9 (2024-07-26)
+------------------
+* Generate version header using `ament_generate_version_header(..)` (backport `#1141 <https://github.com/ros2/rcl/issues/1141>`_) (`#1145 <https://github.com/ros2/rcl/issues/1145>`_)
+* Contributors: mergify[bot]
+
+5.3.8 (2024-05-15)
+------------------
+
+5.3.7 (2024-01-24)
+------------------
+
+5.3.6 (2023-11-13)
+------------------
+* Set disable loan to on by default. (backport `#1110 <https://github.com/ros2/rcl/issues/1110>`_) (`#1116 <https://github.com/ros2/rcl/issues/1116>`_)
+* Contributors: mergify[bot]
+
+5.3.5 (2023-09-19)
+------------------
+* rcl_send_response returns RCL_RET_TIMEOUT. (backport `#1048 <https://github.com/ros2/rcl/issues/1048>`_) (`#1091 <https://github.com/ros2/rcl/issues/1091>`_)
+* Contributors: mergify[bot]
+
+5.3.4 (2023-07-17)
+------------------
+* Implement rcl_clock_time_started (`#1021 <https://github.com/ros2/rcl/issues/1021>`_) (`#1078 <https://github.com/ros2/rcl/issues/1078>`_)
+* Contributors: mergify[bot]
+
+5.3.3 (2023-04-25)
+------------------
+* user defined allocator should be used for rosout publisher. (`#1044 <https://github.com/ros2/rcl/issues/1044>`_) (`#1045 <https://github.com/ros2/rcl/issues/1045>`_)
+* avoid unnecessary copy for rcutils_char_array_vsprintf. (`#1035 <https://github.com/ros2/rcl/issues/1035>`_) (`#1039 <https://github.com/ros2/rcl/issues/1039>`_)
+* Contributors: mergify[bot]
+
 5.3.2 (2022-09-08)
 ------------------
 * fixed rcl_wait return error when timer cancelled (`#1003 <https://github.com/ros2/rcl/issues/1003>`_) (`#1006 <https://github.com/ros2/rcl/issues/1006>`_)

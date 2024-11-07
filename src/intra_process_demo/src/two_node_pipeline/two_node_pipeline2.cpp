@@ -16,100 +16,80 @@
 #include <cinttypes>
 #include <cstdio>
 #include <memory>
-#include <cstring>
+#include <string>
 #include <utility>
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/int32.hpp"
 #include "node_common.hpp"
-#include "conf.hpp"
-#include <vector>
+#include "/home/neu/Desktop/OMP/src/intra_process_demo/include/conf.hpp"
 
-using namespace std;
+using namespace std::chrono_literals;
 
 int main(int argc, char * argv[])
 {
-#if (LOCAL_SCREEN_PRINT == 1)
-  FILE *fp = freopen("/home/neu/Desktop/templog/log.log", "w", stdout);
-#endif
-
   setvbuf(stdout, NULL, _IONBF, BUFSIZ);
-  dummy_load_calibration();
-
-  //传入随机参数，分别是任务链个数（2～7）、每条任务链的周期（50ms~500ms，负载强度固定为30%的情况下，不同的周期对应不同的总执行时间）
-  int chain_num = stoi(argv[1]);
-  int period    = stoi(argv[2]);
-  //任务链执行周期的比例（0表示：1：1：1，1表示1：2：3，2表示3：2：1，3表示1：3：1）
-  int exe_ratio = stoi(argv[3]);
-  //是否启用OpenMP，0表示不启用，1表示启用openmp1，表示启用openmp2
-  int is_openmp = stoi(argv[4]);
 
   rclcpp::init(argc, argv);
 
   rclcpp::executors::MultiThreadedExecutor executor(rclcpp::ExecutorOptions(), EXECUTOR_THREAD_NUM);
 
-  vector<std::shared_ptr<Sensor>>   Timer;
-  vector<std::shared_ptr<Transfer>> Trans;
-  vector<std::shared_ptr<Command>>  Sub;
-  for(int i = 1;i <= chain_num; ++i){
-    std::chrono::duration<int, std::milli> period_ms(period + (i - 1) * 100);
-    // std::chrono::duration<int, std::milli> period_ms(period);
-    //通过任务链周期计算每条任务链的总执行时间，单位为ms
-    int exe_time_sum = (period + (i - 1) * 100) * CHAIN_WORKFLOW;
-    // int exe_time_sum = (period) * CHAIN_WORKFLOW;
-    int exe1, exe2, exe3;
-    switch (exe_ratio)
-    {
-    case 0/* 1:1:1 */:
-      exe1 = exe_time_sum / 3;
-      exe2 = exe_time_sum / 3;
-      exe3 = exe_time_sum / 3;
-      break;
-    case 1/* 1:2:3 */:
-      exe1 = exe_time_sum / 6 * 1;
-      exe2 = exe_time_sum / 6 * 2;
-      exe3 = exe_time_sum / 6 * 3;
-      break;
-    case 2/* 3:2:1 */:
-      exe1 = exe_time_sum / 6 * 3;
-      exe2 = exe_time_sum / 6 * 2;
-      exe3 = exe_time_sum / 6 * 1;
-      break;
-    case 3/* 1:3:1 */:
-      exe1 = exe_time_sum / 5 * 1;
-      exe2 = exe_time_sum / 5 * 3;
-      exe3 = exe_time_sum / 5 * 1;
-      break;
-    }
+  auto Sub1 = std::make_shared<Command>("Sub1", "CHAIN1_TIMER_OUT", 1, 2, 404, true, executor); // 1
+  executor.add_node(Sub1);
 
-    printf("Chain %d : %dms | %d\t%d\t%d\n", i, ((period + (i - 1) * 100)), exe1, exe2, exe3);
-    // printf("Chain %d : %dms | %d\t%d\t%d\n", i, (period), exe1, exe2, exe3);
+  auto Transfer2_1 = std::make_shared<Transfer>("Transfer2_1", "CHAIN1_TIMER_OUT", "CHAIN2_Transfer_OUT", 2, 2, 29, false, executor);
+  executor.add_node(Transfer2_1);
 
-    Timer.push_back(make_shared<Sensor>("Timer" + to_string(i), "CHAIN" + to_string(i) + "_TIMER_OUT", i, 1, is_openmp == 2 ? (exe1 * 10 / OPENMP_THREAD_NUM) : (exe1 * 10), period_ms, 
-                    is_openmp == 0 ? false : true, is_openmp == 2 ? (1 + (10 - i) * 10) : 0, executor));
-    executor.add_node(Timer.back());
-    Trans.push_back(make_shared<Transfer>("Transfer" + to_string(i), "CHAIN" + to_string(i) + "_TIMER_OUT", "CHAIN" + to_string(i) + "_SUB_OUT", i, 2, is_openmp == 2 ? (exe2 * 10 / OPENMP_THREAD_NUM) : (exe2 * 10), 
-                    is_openmp == 0 ? false : true, is_openmp == 2 ? (2 + (10 - i) * 10) : 0, executor));
-    executor.add_node(Trans.back());
-    Sub.push_back(make_shared<Command>("Sub" + to_string(i), "CHAIN" + to_string(i) + "_SUB_OUT", i, 3, is_openmp == 2 ? (exe3 * 10 / OPENMP_THREAD_NUM) : (exe3 * 10), 
-                    is_openmp == 0 ? false : true, is_openmp == 2 ? (3 + (10 - i) * 10) : 0, executor));
-    executor.add_node(Sub.back());
-  }
+  auto Transfer2_2 = std::make_shared<Transfer>("Transfer2_2", "CHAIN2_Transfer_OUT", "CHAIN2_SUB_OUT", 2, 3, 328, true, executor); // 2
+  executor.add_node(Transfer2_2);
 
-  if(is_openmp == 0){
-    set_strategy(0);
-  }else if(is_openmp == 1){
-    set_strategy(1);
-  }else if(is_openmp == 2){
-    set_executor_num(EXECUTOR_THREAD_NUM);
-    set_strategy(2);
-    omp_queue_init();
-  }
+  auto Sub2 = std::make_shared<Command>("Sub2", "CHAIN2_SUB_OUT", 2, 4, 32, false, executor);
+  executor.add_node(Sub2);
+
+  auto Transfer3_1 = std::make_shared<Transfer>("Transfer3_1", "CHAIN3_TIMER_OUT", "CHAIN3_Transfer_OUT", 3, 2, 26,false, executor);
+  executor.add_node(Transfer3_1);
+
+  auto Transfer3_2 = std::make_shared<Transfer>("Transfer3_2", "CHAIN3_Transfer_OUT", "CHAIN3_SUB_OUT", 3, 3, 24,false, executor);
+  executor.add_node(Transfer3_2);
+
+  auto Sub3 = std::make_shared<Command>("Sub3", "CHAIN3_SUB_OUT", 3, 4, 248, true, executor); // 4
+  executor.add_node(Sub3);
+
+  auto Transfer4_1 = std::make_shared<Transfer>("Transfer4_1", "CHAIN4_TIMER_OUT", "CHAIN4_SUB_OUT", 4, 2, 24,false, executor);
+  executor.add_node(Transfer4_1);
+
+  auto Sub4 = std::make_shared<Command>("Sub4", "CHAIN4_SUB_OUT", 4, 3, 31,false, executor);
+  executor.add_node(Sub4);
+
+  auto Transfer5 = std::make_shared<Transfer>("Transfer5", "CHAIN5_TIMER_OUT", "CHAIN5_SUB_OUT", 5, 2, 304,false, executor); // 6
+  executor.add_node(Transfer5);
+
+  auto Sub5 = std::make_shared<Command>("Sub5", "CHAIN5_SUB_OUT", 5, 3, 66,false, executor);
+  executor.add_node(Sub5);
+
+  auto Sub6 = std::make_shared<Command>("Sub6", "CHAIN6_TIMER_OUT", 6, 2, 37,false, executor);
+  executor.add_node(Sub6);
+
+  auto Timer1 = std::make_shared<Sensor>("Timer1", "CHAIN1_TIMER_OUT", 1, 1, 30, 80ms, false, executor);
+  executor.add_node(Timer1);
+
+  auto Timer3 = std::make_shared<Sensor>("Timer3", "CHAIN3_TIMER_OUT", 3, 1, 284, 100ms, true, executor); // 3
+  executor.add_node(Timer3);
+
+  auto Timer4 = std::make_shared<Sensor>("Timer4", "CHAIN4_TIMER_OUT", 4, 1, 364, 100ms, false, executor); // 5
+  executor.add_node(Timer4);
+
+  auto Timer5 = std::make_shared<Sensor>("Timer5", "CHAIN5_TIMER_OUT", 5, 1, 17, 160ms, false, executor);
+  executor.add_node(Timer5);
+
+  auto Timer6 = std::make_shared<Sensor>("Timer6", "CHAIN6_TIMER_OUT", 6, 1, 21, 200ms, false, executor);
+  executor.add_node(Timer6);
+
+  // set_executor_num(EXECUTOR_THREAD_NUM);
+  // set_strategy(2);
+  // omp_queue_init();
+  set_strategy(1);
 
   executor.spin();
-
-#if (LOCAL_SCREEN_PRINT == 1)
-  fclose(fp);
-#endif
 
   rclcpp::shutdown();
 

@@ -2,6 +2,51 @@
 Changelog for package rclcpp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+16.0.10 (2024-07-26)
+--------------------
+* Add test creating two content filter topics with the same topic name (`#2546 <https://github.com/ros2/rclcpp/issues/2546>`_) (`#2549 <https://github.com/ros2/rclcpp/issues/2549>`_) (`#2551 <https://github.com/ros2/rclcpp/issues/2551>`_)
+* Contributors: mergify[bot]
+
+16.0.9 (2024-05-15)
+-------------------
+* Fix logging macros to build with msvc and cpp20 (`#2063 <https://github.com/ros2/rclcpp/issues/2063>`_) (`#2529 <https://github.com/ros2/rclcpp/issues/2529>`_)
+* address ambiguous auto variable. (`#2481 <https://github.com/ros2/rclcpp/issues/2481>`_) (`#2485 <https://github.com/ros2/rclcpp/issues/2485>`_)
+* Fix clang warning: bugprone-use-after-move (`#2116 <https://github.com/ros2/rclcpp/issues/2116>`_) (`#2459 <https://github.com/ros2/rclcpp/issues/2459>`_)
+* Contributors: Tamaki Nishino, mergify[bot]
+
+16.0.8 (2024-01-24)
+-------------------
+* Add missing stdexcept include (`#2186 <https://github.com/ros2/rclcpp/issues/2186>`_) (`#2394 <https://github.com/ros2/rclcpp/issues/2394>`_)
+* Contributors: gentoo90
+
+16.0.7 (2023-11-13)
+-------------------
+* Disable the loaned messages inside the executor. (backport `#2335 <https://github.com/ros2/rclcpp/issues/2335>`_) (`#2364 <https://github.com/ros2/rclcpp/issues/2364>`_)
+* Add missing 'enable_rosout' comments (`#2345 <https://github.com/ros2/rclcpp/issues/2345>`_) (`#2347 <https://github.com/ros2/rclcpp/issues/2347>`_)
+* address rate related flaky tests. (`#2329 <https://github.com/ros2/rclcpp/issues/2329>`_) (`#2342 <https://github.com/ros2/rclcpp/issues/2342>`_)
+* Update SignalHandler get_global_signal_handler to avoid complex types in static memory (`#2316 <https://github.com/ros2/rclcpp/issues/2316>`_) (`#2321 <https://github.com/ros2/rclcpp/issues/2321>`_)
+* Fix C++20 allocator construct deprecation (`#2292 <https://github.com/ros2/rclcpp/issues/2292>`_) (`#2319 <https://github.com/ros2/rclcpp/issues/2319>`_)
+* Contributors: mergify[bot]
+
+16.0.6 (2023-09-19)
+-------------------
+* Topic correct typeadapter deduction (`#2294 <https://github.com/ros2/rclcpp/issues/2294>`_) (`#2297 <https://github.com/ros2/rclcpp/issues/2297>`_)
+* check thread whether joinable before join (`#2019 <https://github.com/ros2/rclcpp/issues/2019>`_) (`#2275 <https://github.com/ros2/rclcpp/issues/2275>`_)
+* Do not crash Executor when send_response fails due to client failure. (`#2276 <https://github.com/ros2/rclcpp/issues/2276>`_) (`#2280 <https://github.com/ros2/rclcpp/issues/2280>`_)
+* Contributors: mergify[bot]
+
+16.0.5 (2023-07-17)
+-------------------
+* warning: comparison of integer expressions of different signedness (`#2219 <https://github.com/ros2/rclcpp/issues/2219>`_) (`#2223 <https://github.com/ros2/rclcpp/issues/2223>`_)
+* Trigger the intraprocess guard condition with data (`#2164 <https://github.com/ros2/rclcpp/issues/2164>`_) (`#2167 <https://github.com/ros2/rclcpp/issues/2167>`_)
+* Implement validity checks for rclcpp::Clock (`#2040 <https://github.com/ros2/rclcpp/issues/2040>`_) (`#2210 <https://github.com/ros2/rclcpp/issues/2210>`_)
+* Contributors: Tomoya Fujita, mergify[bot]
+
+16.0.4 (2023-04-25)
+-------------------
+* use allocator via init_options argument. (`#2129 <https://github.com/ros2/rclcpp/issues/2129>`_) (`#2131 <https://github.com/ros2/rclcpp/issues/2131>`_)
+* Contributors: mergify[bot]
+
 16.0.3 (2023-01-10)
 -------------------
 * Fix SharedFuture from async_send_request never becomes valid (`#2044 <https://github.com/ros2/rclcpp/issues/2044>`_) (`#2076 <https://github.com/ros2/rclcpp/issues/2076>`_)

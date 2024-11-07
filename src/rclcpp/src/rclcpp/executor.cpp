@@ -19,7 +19,7 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
-#include <mutex>
+
 #include "rcl/allocator.h"
 #include "rcl/error_handling.h"
 #include "rcpputils/scope_exit.hpp"
@@ -30,20 +30,9 @@
 #include "rclcpp/memory_strategy.hpp"
 #include "rclcpp/node.hpp"
 #include "rclcpp/utilities.hpp"
-
 #include "rcutils/logging_macros.h"
-
 #include "tracetools/tracetools.h"
-
-#include "/usr/local/lib/gcc/x86_64-pc-linux-gnu/15.0.0/include/omp.h"
-#include <unistd.h>
-#include <sys/syscall.h>
-#include <string>
-#include <cstdlib>
-#include <time.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <pthread.h>
+#include "/usr/local/gcc/lib/gcc/aarch64-unknown-linux-gnu/15.0.0/include/omp.h"
 
 using namespace std::chrono_literals;
 
@@ -516,17 +505,6 @@ Executor::set_memory_strategy(rclcpp::memory_strategy::MemoryStrategy::SharedPtr
 }
 
 void
-Executor::trigger_interrupt_guard(){
-  try {
-    interrupt_guard_condition_.trigger();
-  } catch (const rclcpp::exceptions::RCLError & ex) {
-    throw std::runtime_error(
-            std::string(
-              "Failed to trigger guard condition from execute_any_executable: ") + ex.what());
-  }
-}
-
-void
 Executor::execute_any_executable(AnyExecutable & any_exec)
 {
   if (!spinning.load()) {
@@ -667,6 +645,11 @@ Executor::execute_subscription(rclcpp::SubscriptionBase::SharedPtr subscription)
       subscription->get_topic_name(),
       [&]() {return subscription->take_type_erased(message.get(), message_info);},
       [&]() {subscription->handle_message(message, message_info);});
+    // TODO(clalancette): In the case that the user is using the MessageMemoryPool,
+    // and they take a shared_ptr reference to the message in the callback, this can
+    // inadvertently return the message to the pool when the user is still using it.
+    // This is a bug that needs to be fixed in the pool, and we should probably have
+    // a custom deleter for the message that actually does the return_message().
     subscription->return_message(message);
   }
 }
@@ -920,25 +903,22 @@ Executor::get_next_ready_executable_from_map(
   return success;
 }
 
-uint64_t get_clocktime1() { 
-    long int        ns; 
-    uint64_t        all; 
-    time_t          sec; 
-    struct timespec spec; 
-
-    clock_gettime(CLOCK_REALTIME, &spec);
-
-    sec   = spec.tv_sec; 
-    ns    = spec.tv_nsec; 
-    all   = (uint64_t) sec * 1000000000UL + (uint64_t) ns; 
-    return all;  
+void
+Executor::trigger_interrupt_guard(){
+  try {
+    interrupt_guard_condition_.trigger();
+  } catch (const rclcpp::exceptions::RCLError & ex) {
+    throw std::runtime_error(
+            std::string(
+              "Failed to trigger guard condition from execute_any_executable: ") + ex.what());
+  }
 }
 
-// pthread_mutex_t mutex;
+// std::mutex wait_mutex;
 int flag = 0;
 pthread_mutexattr_t attr;
 pthread_mutex_t mutex;
-bool 
+bool
 Executor::get_next_executable(AnyExecutable & any_executable, std::chrono::nanoseconds timeout)
 {
   if (flag == 0){
@@ -947,26 +927,17 @@ Executor::get_next_executable(AnyExecutable & any_executable, std::chrono::nanos
     pthread_mutex_init(&mutex, &attr);
     flag++;
   }
-  // long int tid = syscall(SYS_gettid);
-  // std::unique_lock<std::mutex> wait_lock{wait_mutex};
-
-  // uint64_t cur = get_clocktime1();
-  // printf("|TID:%ld|lock-->|%lu|\n", tid, cur);
-
-  pthread_mutex_lock(&mutex);
-
-  // cur = get_clocktime1();
-  // printf("|TID:%ld|lock111-->|%lu|\n", tid, cur);
-
   bool success = false;
+  // std::unique_lock<std::mutex> wait_lock{wait_mutex};
+   pthread_mutex_lock(&mutex);
+  // Check to see if there are any subscriptions or timers needing service
+  // TODO(wjwwood): improve run to run efficiency of this function
   success = get_next_ready_executable(any_executable);
-
+  // If there are none
   if (!success) {
+    // Wait for subscriptions or timers to work on
 
     if(get_strategy() == 2){
-      // uint64_t cur = get_clocktime1();
-      // printf("|TID:%ld|33333-->|%lu|\n", tid, cur);
-
       omp_Node *temp = dequeue();
       if(temp != NULL){
         // wait_lock.unlock();
@@ -975,27 +946,19 @@ Executor::get_next_executable(AnyExecutable & any_executable, std::chrono::nanos
         dequeue1(temp);
         temp = dequeue();
         while(temp != NULL){
-          // cur = get_clocktime1();
-          // printf("|Tid:%ld|-->|&&&&&|%ld\n", tid, cur);
           temp->fn(temp->data);
           dequeue1(temp);
           temp = dequeue();
         }
-        // cur = get_clocktime1();
-        // printf("|Tid:%ld|-->|!!!!!|%ld\n", tid, cur);
-        // wait_lock.lock();
         pthread_mutex_lock(&mutex);
+        // wait_lock.lock();
       }
       set_wait_for_work_flag(true);
-      // cur = get_clocktime1();
-      // printf("|TID:%ld|Wait111-->|%lu|\n", tid, cur);
     }
 
     wait_for_work(timeout);
 
     if(get_strategy() == 2){
-      // uint64_t cur = get_clocktime1();
-      // printf("|TID:%ld|Wait222-->|%lu|\n", tid, cur);
       set_wait_for_work_flag(false);
     }
 
@@ -1005,10 +968,9 @@ Executor::get_next_executable(AnyExecutable & any_executable, std::chrono::nanos
     // Try again
     success = get_next_ready_executable(any_executable);
   }
-  // wait_lock.unlock();
-  // cur = get_clocktime1();
-  // printf("|TID:%ld|unlock-->|%lu|\n", tid, cur);
   pthread_mutex_unlock(&mutex);
+  // wait_lock.unlock();
+
   return success;
 }
 

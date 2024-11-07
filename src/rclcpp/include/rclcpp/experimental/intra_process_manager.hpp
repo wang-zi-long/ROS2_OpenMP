@@ -454,6 +454,8 @@ private:
         if (std::next(it) == subscription_ids.end()) {
           // If this is the last subscription, give up ownership
           subscription->provide_intra_process_data(std::move(message));
+          // Last message delivered, break from for loop
+          break;
         } else {
           // Copy the message since we have additional subscriptions to serve
           Deleter deleter = message.get_deleter();
@@ -479,13 +481,13 @@ private:
                 "subscription use different allocator types, which is not supported");
       }
 
-      if constexpr (rclcpp::TypeAdapter<MessageT>::is_specialized::value) {
+      if constexpr (rclcpp::TypeAdapter<MessageT, ROSMessageType>::is_specialized::value) {
         ROSMessageTypeAllocator ros_message_alloc(allocator);
-        auto ptr = ros_message_alloc.allocate(1);
-        ros_message_alloc.construct(ptr);
+        auto ptr = ROSMessageTypeAllocatorTraits::allocate(ros_message_alloc, 1);
+        ROSMessageTypeAllocatorTraits::construct(ros_message_alloc, ptr);
         ROSMessageTypeDeleter deleter;
         allocator::set_allocator_for_deleter(&deleter, &allocator);
-        rclcpp::TypeAdapter<MessageT>::convert_to_ros_message(*message, *ptr);
+        rclcpp::TypeAdapter<MessageT, ROSMessageType>::convert_to_ros_message(*message, *ptr);
         auto ros_msg = std::unique_ptr<ROSMessageType, ROSMessageTypeDeleter>(ptr, deleter);
         ros_message_subscription->provide_intra_process_message(std::move(ros_msg));
       } else {
@@ -493,6 +495,8 @@ private:
           if (std::next(it) == subscription_ids.end()) {
             // If this is the last subscription, give up ownership
             ros_message_subscription->provide_intra_process_message(std::move(message));
+            // Last message delivered, break from for loop
+            break;
           } else {
             // Copy the message since we have additional subscriptions to serve
             Deleter deleter = message.get_deleter();

@@ -2,10 +2,9 @@ cmake_minimum_required(VERSION 3.12)
 
 project(rclcpp)
 
-set(OpenMP_gomp_LIBRARY "/usr/local/lib64/libgomp.so")
+set(OpenMP_gomp_LIBRARY "/usr/local/gcc/lib64/libgomp.so")
 
 find_package(Threads REQUIRED)
-
 find_package(ament_cmake_ros REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(builtin_interfaces REQUIRED)
@@ -182,7 +181,6 @@ foreach(interface_file ${interface_files})
     include/rclcpp/node_interfaces/get_${interface_name}.hpp)
 endforeach()
 
-# 定义库
 add_library(${PROJECT_NAME} ${${PROJECT_NAME}_SRCS})
 
 # 链接 OpenMP 和其他库

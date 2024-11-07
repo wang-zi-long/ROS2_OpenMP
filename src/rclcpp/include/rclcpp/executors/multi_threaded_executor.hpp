@@ -78,10 +78,6 @@ protected:
   void
   run(size_t this_thread_number);
 
-  RCLCPP_PUBLIC
-  void
-  run_new(size_t this_thread_number, int spin_type);
-
 private:
   RCLCPP_DISABLE_COPY(MultiThreadedExecutor)
 

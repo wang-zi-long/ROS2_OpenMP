@@ -26,7 +26,6 @@ extern "C"
 #include "rcutils/stdatomic_helper.h"
 #include "rcutils/time.h"
 #include "tracetools/tracetools.h"
-#include "/home/neu/Desktop/OpenMP/src/intra_process_demo/include/conf.hpp"
 
 struct rcl_timer_impl_s
 {
@@ -240,8 +239,6 @@ rcl_timer_clock(rcl_timer_t * timer, rcl_clock_t ** clock)
   return RCL_RET_OK;
 }
 
-static uint64_t timer_missed = 0;
-
 rcl_ret_t
 rcl_timer_call(rcl_timer_t * timer)
 {
@@ -274,22 +271,16 @@ rcl_timer_call(rcl_timer_t * timer)
   next_call_time += period;
   // in case the timer has missed at least once cycle
   if (next_call_time < now) {
-
-    // 用来记录因过载错过的定时器执行次数
-  #if(TIMER_MISSED == 1)
-    timer_missed ++;
-    printf("Timer_missed : %ld\n", timer_missed);
-  #endif
-  
     if (0 == period) {
       // a timer with a period of zero is considered always ready
       next_call_time = now;
     } else {
       // move the next call time forward by as many periods as necessary
-      int64_t now_ahead = now - next_call_time;
-      // rounding up without overflow
-      int64_t periods_ahead = 1 + (now_ahead - 1) / period;
-      next_call_time += periods_ahead * period;
+      // int64_t now_ahead = now - next_call_time;
+      // // rounding up without overflow
+      // int64_t periods_ahead = 1 + (now_ahead - 1) / period;
+      // next_call_time += periods_ahead * period;
+      next_call_time = now + period;
     }
   }
   rcutils_atomic_store(&timer->impl->next_call_time, next_call_time);

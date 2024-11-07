@@ -217,7 +217,7 @@ Context::init(
     if (0u == count) {
       ret = rcl_logging_configure_with_output_handler(
         &rcl_context_->global_arguments,
-        rcl_init_options_get_allocator(init_options_.get_rcl_init_options()),
+        rcl_init_options_get_allocator(init_options.get_rcl_init_options()),
         rclcpp_logging_output_handler);
       if (RCL_RET_OK != ret) {
         rcl_context_.reset();
@@ -497,7 +497,7 @@ Context::sleep_for(const std::chrono::nanoseconds & nanoseconds)
       std::unique_lock<std::mutex> lock(interrupt_mutex_);
       auto start = std::chrono::steady_clock::now();
       // this will release the lock while waiting
-      interrupt_condition_variable_.wait_for(lock, nanoseconds);
+      interrupt_condition_variable_.wait_for(lock, time_left);
       time_left -= std::chrono::steady_clock::now() - start;
     }
   } while (time_left > std::chrono::nanoseconds::zero() && this->is_valid());
